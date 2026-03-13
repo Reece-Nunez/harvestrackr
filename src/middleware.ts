@@ -4,11 +4,25 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request);
 
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
   // Handle auth callback - allow it to proceed
   if (pathname.startsWith("/auth/callback")) {
     return supabaseResponse;
+  }
+
+  // Catch auth codes landing on wrong pages (e.g., Supabase redirecting to root)
+  // and route them through the proper auth callback
+  const code = searchParams.get("code");
+  if (code && pathname !== "/api/auth/callback" && !pathname.startsWith("/api/")) {
+    const callbackUrl = request.nextUrl.clone();
+    callbackUrl.pathname = "/api/auth/callback";
+    // Preserve the code param; default next to reset-password if coming from root
+    callbackUrl.searchParams.set("code", code);
+    if (!callbackUrl.searchParams.has("next")) {
+      callbackUrl.searchParams.set("next", pathname === "/" ? "/reset-password" : pathname);
+    }
+    return NextResponse.redirect(callbackUrl);
   }
 
   // Protect /dashboard/* and /team/* routes - redirect to login if not authenticated
