@@ -63,7 +63,7 @@ export function SignupForm() {
     try {
       const supabase = createClient();
 
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -86,6 +86,12 @@ export function SignupForm() {
 
       // Send welcome email via Resend (non-blocking)
       sendWelcomeEmailAction(data.email, data.firstName).catch(() => {});
+
+      // If Supabase requires email confirmation, session will be null
+      if (!signUpData.session) {
+        toast.success("Account created! Please check your email to confirm your account.");
+        return;
+      }
 
       toast.success("Account created! Welcome to HarvesTrackr.");
       router.push(redirectTo || "/dashboard");
