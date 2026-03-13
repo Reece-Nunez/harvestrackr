@@ -51,6 +51,7 @@ function DatePicker({
           mode="single"
           selected={date}
           onSelect={onDateChange}
+          defaultMonth={date}
           autoFocus
         />
       </PopoverContent>

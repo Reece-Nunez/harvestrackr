@@ -132,7 +132,13 @@ export default function ScanReceiptPage() {
 
       setParsedData(result);
       setVendor(result.vendor);
-      setDate(result.date ? new Date(result.date) : new Date());
+      // Parse YYYY-MM-DD as local date (not UTC) to avoid off-by-one timezone shift
+      if (result.date) {
+        const [y, m, d] = result.date.split("-").map(Number);
+        setDate(new Date(y, m - 1, d));
+      } else {
+        setDate(new Date());
+      }
       setLineItems(
         result.items.map((item, index) => ({
           ...item,
@@ -155,6 +161,7 @@ export default function ScanReceiptPage() {
       }
 
       setProcessingState("complete");
+      setIsEditing(true);
     } catch (err) {
       console.error("OCR processing error:", err);
       setError(err instanceof Error ? err.message : "Failed to process receipt");
@@ -243,30 +250,40 @@ export default function ScanReceiptPage() {
     setIsSubmitting(true);
 
     try {
-      // Upload receipt image if available
+      // Upload receipt image if available (don't block expense creation if this fails)
       let receiptImageUrl: string | null = null;
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        const uploadResult = await uploadReceiptImage(formData);
-        if (uploadResult.success && uploadResult.data) {
-          receiptImageUrl = uploadResult.data.url;
+        try {
+          const formData = new FormData();
+          formData.append("file", imageFile);
+          const uploadResult = await uploadReceiptImage(formData);
+          if (uploadResult.success && uploadResult.data) {
+            receiptImageUrl = uploadResult.data.url;
+          }
+        } catch (uploadErr) {
+          console.error("Receipt image upload failed:", uploadErr);
+          // Continue without the image — the expense data is more important
         }
       }
+
+      // Format date as YYYY-MM-DD in local time (avoid UTC shift)
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
 
       // Create expense
       const result = await createExpense({
         farmId: currentFarm.id,
-        date: date.toISOString().split("T")[0],
+        date: `${yyyy}-${mm}-${dd}`,
         vendor: vendor.trim(),
         grandTotal,
         receiptImageUrl,
         lineItems: lineItems.map((item) => ({
-          item: item.description,
+          item: item.description || "Receipt Item",
           category: item.category,
           quantity: item.quantity,
           unitCost: item.unitPrice,
-          lineTotal: item.total,
+          lineTotal: Math.round(item.total * 100) / 100,
         })),
       });
 
@@ -278,7 +295,9 @@ export default function ScanReceiptPage() {
       }
     } catch (err) {
       console.error("Error creating expense:", err);
-      toast.error("Failed to create expense");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to create expense"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -456,12 +475,21 @@ export default function ScanReceiptPage() {
                 </Badge>
               </div>
               <Button
-                variant="outline"
+                variant={isEditing ? "default" : "outline"}
                 size="sm"
                 onClick={() => setIsEditing(!isEditing)}
               >
-                <Edit2 className="h-4 w-4 mr-2" />
-                {isEditing ? "Done Editing" : "Edit Details"}
+                {isEditing ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Looks Good
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit Details
+                  </>
+                )}
               </Button>
             </div>
           </div>
