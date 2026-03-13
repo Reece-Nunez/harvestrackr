@@ -67,15 +67,11 @@ async function getTeamData(farmId: string) {
 
   // Get pending invitations (only for OWNER/ADMIN)
   let invitations: TeamInvitationWithInviter[] = [];
-  console.log("getTeamData: role =", roleResult.data);
   if (roleResult.data === "OWNER" || roleResult.data === "ADMIN") {
     const invitationsResult = await getPendingInvitations(farmId);
-    console.log("getTeamData: invitationsResult =", JSON.stringify(invitationsResult));
     if (invitationsResult.success && invitationsResult.data) {
       invitations = invitationsResult.data;
     }
-  } else {
-    console.log("getTeamData: skipping invitations, role is not OWNER/ADMIN");
   }
 
   return {
