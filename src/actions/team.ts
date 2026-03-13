@@ -94,6 +94,8 @@ export async function getPendingInvitations(
       .eq("status", "PENDING")
       .order("created_at", { ascending: false });
 
+    console.log("getPendingInvitations debug:", { farmId, invitations, error, count: invitations?.length });
+
     if (error) {
       console.error("Error fetching invitations:", error);
       return { success: false, error: `Failed to fetch invitations: ${error.message}` };
