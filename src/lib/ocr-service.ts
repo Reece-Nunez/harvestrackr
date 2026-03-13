@@ -61,7 +61,7 @@ function fileToBase64(file: Blob): Promise<string> {
  * Compresses and resizes an image to stay under Vercel's 4.5MB body limit.
  * Targets ~1.5MB max base64 payload (well within the limit after JSON wrapping).
  */
-function compressImage(file: File, maxWidthOrHeight = 1600, quality = 0.7): Promise<Blob> {
+function compressImage(file: File, maxWidthOrHeight = 2000, quality = 0.85): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {

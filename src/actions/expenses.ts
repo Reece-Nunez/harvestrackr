@@ -76,6 +76,7 @@ export async function createExpense(
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: expense.id,
       item: item.item,
+      description: item.item,
       category: item.category,
       quantity: item.quantity,
       unit_cost: item.unitCost,
@@ -174,6 +175,7 @@ export async function updateExpense(
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: id,
       item: item.item,
+      description: item.item,
       category: item.category,
       quantity: item.quantity,
       unit_cost: item.unitCost,

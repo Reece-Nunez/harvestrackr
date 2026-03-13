@@ -10,39 +10,76 @@ const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8MB
 // Category keywords for AI prompt context
 const CATEGORY_LIST = EXPENSE_CATEGORIES.join(", ");
 
-const RECEIPT_PROMPT = `You are a receipt data extraction assistant for a farm expense tracking application called HarvesTrackr.
+const RECEIPT_PROMPT = `You are an expert receipt data extraction system for HarvesTrackr, a farm expense tracking app. Your job is to be extremely accurate — the farmer relies on this data for tax records.
 
-Analyze this receipt image carefully and extract ALL information into structured JSON.
+# TASK
+Extract ALL information from this receipt into structured JSON. Be methodical: read the receipt top-to-bottom, then verify your work.
 
-Return ONLY valid JSON (no markdown, no code fences, no explanation) with this exact structure:
+# OUTPUT FORMAT
+Return ONLY valid JSON. No markdown, no code fences, no explanation.
+
 {
-  "vendor": "Store or business name exactly as printed",
+  "vendor": "Exact store/business name as printed on the receipt header",
   "date": "YYYY-MM-DD",
   "subtotal": 0.00,
   "tax": 0.00,
   "total": 0.00,
   "items": [
     {
-      "description": "Item name or description as printed",
+      "description": "Full item name/description as printed",
       "quantity": 1,
       "unitPrice": 0.00,
       "total": 0.00,
-      "category": "category from the list below"
+      "category": "one of the valid categories below"
     }
   ]
 }
 
-Valid categories (pick the best match for each item):
-${CATEGORY_LIST}
+# VALID CATEGORIES — use EXACTLY one of these strings per item:
+${EXPENSE_CATEGORIES.map((c) => `- "${c}"`).join("\n")}
 
-Rules:
-- Extract EVERY line item visible on the receipt
-- Amounts must be numbers with no currency symbols
-- If a date is unreadable, use null (the app will default to today)
-- If the total is visible but individual items are hard to read, still include the total
-- For quantity: if not explicitly shown, assume 1
-- unitPrice = total / quantity for each item
-- Be precise with dollar amounts — double-check decimal places`;
+Category guidance for common farm store items:
+- Herbicides, pesticides, insecticides, fungicides → "Chemicals"
+- Animal feed, hay, grain, mineral blocks, supplements → "Feed Purchased"
+- Fertilizer, lime, soil amendments → "Fertilizers and Lime"
+- Diesel, gas, oil, DEF fluid → "Gasoline, Fuel, and Oil"
+- Seeds, seedlings, transplants, bulbs → "Seeds and Plants"
+- Fencing, tools, hardware, buckets, hoses, general supplies → "Supplies Purchased"
+- Tractor parts, equipment parts, welding supplies → "Repairs and Maintenance"
+- Tractors, implements, trailers (large purchases) → "Farm Equipment"
+- Vaccines, dewormers, antibiotics → "Medicine"
+- Vet visit charges → "Vet"
+- Electric, water, phone, internet bills → "Utilities"
+- If truly unsure, use "Supplies Purchased"
+
+# EXTRACTION RULES
+
+## Dates
+- Look for the date near the top of the receipt, often on the same line as the time
+- Common formats: MM/DD/YYYY, MM/DD/YY, MM-DD-YYYY, Month DD YYYY
+- For 2-digit years: 24→2024, 25→2025, 26→2026
+- If the date is completely unreadable, use null
+
+## Amounts — THIS IS CRITICAL
+- All amounts must be plain numbers (no $ signs): 12.99 not "$12.99"
+- Watch decimal places carefully: "1299" on a receipt likely means $12.99, not $1,299
+- If a price looks like "4 99" or "4.99" that is $4.99
+- Negative amounts or amounts with a minus sign are discounts/returns — still include them as items with negative totals
+- Tax is usually labeled TAX, SALES TAX, or similar — it is separate from the subtotal
+
+## Line items
+- Extract EVERY individual line item, not just a summary
+- Include the full item description as printed (abbreviations are OK, e.g., "PURINA FLCK RASR 50LB")
+- If quantity is shown (e.g., "2 @ 5.99" or "QTY: 2"), use it. Otherwise assume 1
+- unitPrice = line total ÷ quantity
+- If an item is voided or crossed out, skip it
+
+## Verification (do this mentally before responding)
+1. Do all item totals add up to approximately the subtotal?
+2. Does subtotal + tax ≈ total?
+3. If the math doesn't add up, re-read the amounts — you may have misread a digit
+4. Is the date reasonable (not in the future, not decades old)?
+5. Does each category exactly match one from the valid list?`;
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
@@ -159,7 +196,8 @@ export async function POST(request: NextRequest) {
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
+      max_tokens: 4096,
+      system: "You are a precise receipt data extraction system. You output ONLY valid JSON — no prose, no markdown fences, no explanation. Accuracy is critical: every dollar amount, date, and item name must exactly match what is printed on the receipt.",
       messages: [
         {
           role: "user",
