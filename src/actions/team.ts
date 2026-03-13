@@ -152,18 +152,6 @@ export async function inviteTeamMember(
       return { success: false, error: "You do not have permission to invite members" };
     }
 
-    // Get user info for invitation
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("first_name, last_name")
-      .eq("id", user.id)
-      .single();
-
-    const inviterName =
-      userData?.first_name && userData?.last_name
-        ? `${userData.first_name} ${userData.last_name}`
-        : user.email || "Farm Team";
-
     // Check if invitation already exists
     const { data: existingInvitation } = await supabase
       .from("team_invitations")
@@ -175,27 +163,6 @@ export async function inviteTeamMember(
 
     if (existingInvitation) {
       return { success: false, error: "An invitation has already been sent to this email" };
-    }
-
-    // Check if user is already a member
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", email.toLowerCase())
-      .single();
-
-    if (existingUser) {
-      const { data: existingMember } = await supabase
-        .from("team_members")
-        .select("id")
-        .eq("farm_id", farmId)
-        .eq("user_id", existingUser.id)
-        .eq("is_active", true)
-        .single();
-
-      if (existingMember) {
-        return { success: false, error: "This user is already a member of the farm" };
-      }
     }
 
     // Create invitation
@@ -239,7 +206,7 @@ export async function inviteTeamMember(
           redirectTo: `${appUrl}/team/accept?token=${invitation.id}`,
           data: {
             invited_to_farm: farmName,
-            invited_by: inviterName,
+            invited_by: user.email || "Farm Team",
             role: validatedData.data.role,
           },
         }
