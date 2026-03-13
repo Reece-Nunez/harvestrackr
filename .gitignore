@@ -43,3 +43,9 @@ next-env.d.ts
 # data exports
 dynamodb-export/
 user-migration-results.json
+
+# claude code
+.claude/
+
+# supabase cli
+supabase/.temp/
