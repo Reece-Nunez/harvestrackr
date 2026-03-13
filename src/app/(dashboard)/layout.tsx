@@ -14,13 +14,6 @@ interface ProfileRow {
   updated_at: string;
 }
 
-// Type for farm_members table (used by migration scripts)
-interface FarmMemberRow {
-  farm_id: string;
-  user_id: string;
-  role: string;
-  joined_at: string;
-}
 
 export default async function DashboardLayout({
   children,
@@ -39,40 +32,27 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  // Fetch user profile - try 'users' table first, fall back to 'profiles'
+  // Fetch user profile from profiles table
   let userProfile: User | null = null;
 
-  const { data: usersData } = await supabase
-    .from("users")
+  const { data: profilesData } = await (supabase as any)
+    .from("profiles")
     .select("*")
     .eq("id", authUser.id)
-    .single();
+    .single() as { data: ProfileRow | null };
 
-  if (usersData) {
-    userProfile = usersData;
-  } else {
-    // Fall back to profiles table (used by migration scripts)
-    // Using type assertion since profiles table isn't in generated types
-    const { data: profilesData } = await (supabase as any)
-      .from("profiles")
-      .select("*")
-      .eq("id", authUser.id)
-      .single() as { data: ProfileRow | null };
-
-    if (profilesData) {
-      // Map profiles schema to users schema
-      const nameParts = (profilesData.full_name || "").split(" ");
-      userProfile = {
-        id: profilesData.id,
-        email: profilesData.email,
-        first_name: nameParts[0] || null,
-        last_name: nameParts.slice(1).join(" ") || null,
-        avatar_url: profilesData.avatar_url || null,
-        preferences: null,
-        created_at: profilesData.created_at,
-        updated_at: profilesData.updated_at,
-      };
-    }
+  if (profilesData) {
+    const nameParts = (profilesData.full_name || "").split(" ");
+    userProfile = {
+      id: profilesData.id,
+      email: profilesData.email,
+      first_name: nameParts[0] || null,
+      last_name: nameParts.slice(1).join(" ") || null,
+      avatar_url: profilesData.avatar_url || null,
+      preferences: null,
+      created_at: profilesData.created_at,
+      updated_at: profilesData.updated_at,
+    };
   }
 
   // Fetch user's farms (owned and team member)
@@ -83,27 +63,15 @@ export default async function DashboardLayout({
     .eq("is_active", true)
     .order("name");
 
-  // Try team_members first, fall back to farm_members (used by migration)
   let teamFarmIds: string[] = [];
 
-  const { data: teamMembersData } = await supabase
-    .from("team_members")
+  const { data: farmMembersData } = await supabase
+    .from("farm_members")
     .select("farm_id")
-    .eq("user_id", authUser.id)
-    .eq("is_active", true);
+    .eq("user_id", authUser.id);
 
-  if (teamMembersData && teamMembersData.length > 0) {
-    teamFarmIds = teamMembersData.map((tm) => tm.farm_id);
-  } else {
-    // Fall back to farm_members table (used by migration scripts)
-    const { data: farmMembersData } = await (supabase as any)
-      .from("farm_members")
-      .select("farm_id")
-      .eq("user_id", authUser.id) as { data: FarmMemberRow[] | null };
-
-    if (farmMembersData) {
-      teamFarmIds = farmMembersData.map((tm) => tm.farm_id);
-    }
+  if (farmMembersData && farmMembersData.length > 0) {
+    teamFarmIds = farmMembersData.map((tm) => tm.farm_id);
   }
 
   let teamFarms: Farm[] = [];

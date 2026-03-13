@@ -138,6 +138,84 @@ export interface Database {
           }
         ];
       };
+      farm_members: {
+        Row: {
+          id: string;
+          farm_id: string;
+          user_id: string;
+          role: TeamRole;
+          joined_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          farm_id: string;
+          user_id: string;
+          role: TeamRole;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          farm_id?: string;
+          user_id?: string;
+          role?: TeamRole;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "farm_members_farm_id_fkey";
+            columns: ["farm_id"];
+            isOneToOne: false;
+            referencedRelation: "farms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "farm_members_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          email: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          phone: string | null;
+          timezone: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          phone?: string | null;
+          timezone?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          phone?: string | null;
+          timezone?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       users: {
         Row: {
           id: string;
@@ -1180,6 +1258,8 @@ export type Enums<T extends keyof Database["public"]["Enums"]> =
 export type User = Tables<"users">;
 export type Farm = Tables<"farms">;
 export type TeamMember = Tables<"team_members">;
+export type FarmMember = Tables<"farm_members">;
+export type Profile = Tables<"profiles">;
 export type TeamInvitation = Tables<"team_invitations">;
 export type Expense = Tables<"expenses">;
 export type LineItem = Tables<"expense_line_items">;

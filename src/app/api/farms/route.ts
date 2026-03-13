@@ -31,12 +31,11 @@ export async function GET() {
       throw ownedError;
     }
 
-    // Fetch farms where user is a team member
+    // Fetch farms where user is a farm member
     const { data: teamMemberships } = await supabase
-      .from("team_members")
+      .from("farm_members")
       .select("farm_id")
-      .eq("user_id", user.id)
-      .eq("is_active", true);
+      .eq("user_id", user.id);
 
     const teamFarmIds = teamMemberships?.map((tm) => tm.farm_id) || [];
 

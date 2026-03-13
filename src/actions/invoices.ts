@@ -68,11 +68,10 @@ export async function createInvoice(
 
     if (!farmAccess) {
       const { data: teamAccess } = await supabase
-        .from("team_members")
+        .from("farm_members")
         .select("id")
         .eq("farm_id", farmId)
         .eq("user_id", user.id)
-        .eq("is_active", true)
         .single();
 
       if (!teamAccess) {
