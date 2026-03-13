@@ -48,6 +48,10 @@ export async function createExpense(
       validatedData.data;
 
     // Create expense
+    const description = notes
+      || lineItems.map((i) => i.item).join(", ")
+      || `Purchase from ${vendor}`;
+
     const { data: expense, error: expenseError } = await supabase
       .from("expenses")
       .insert({
@@ -55,6 +59,7 @@ export async function createExpense(
         user_id: user.id,
         date,
         vendor,
+        description,
         notes,
         grand_total: grandTotal,
         receipt_image_url: receiptImageUrl,
