@@ -77,21 +77,30 @@ export function SignupForm() {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("An account with this email already exists.");
+          toast.error("An account with this email already exists. Please sign in instead.");
         } else {
           toast.error(error.message);
         }
         return;
       }
 
-      // Send welcome email via Resend (non-blocking)
-      sendWelcomeEmailAction(data.email, data.firstName).catch(() => {});
+      // Supabase returns fake success (no error, no session, empty identities)
+      // when the email already exists — e.g. user was invited before signing up
+      const isExistingUser =
+        !signUpData.session ||
+        signUpData.user?.identities?.length === 0;
 
-      // If Supabase requires email confirmation, session will be null
-      if (!signUpData.session) {
-        toast.success("Account created! Please check your email to confirm your account.");
+      if (isExistingUser) {
+        toast.error("An account with this email already exists. Please sign in instead.");
+        const loginUrl = redirectTo
+          ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+          : "/login";
+        router.push(loginUrl);
         return;
       }
+
+      // Send welcome email via Resend (non-blocking)
+      sendWelcomeEmailAction(data.email, data.firstName).catch(() => {});
 
       toast.success("Account created! Welcome to HarvesTrackr.");
       router.push(redirectTo || "/dashboard");
