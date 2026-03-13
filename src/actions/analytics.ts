@@ -159,11 +159,12 @@ export async function getExpensesByCategory(farmId: string, dateRange: DateRange
 
   expenses?.forEach((expense) => {
     if (expense.expense_line_items && expense.expense_line_items.length > 0) {
-      expense.expense_line_items.forEach((item: { category: string; line_total: number }) => {
-        const current = categoryMap.get(item.category) || { amount: 0, count: 0 };
+      expense.expense_line_items.forEach((item: { category: string | null; line_total: number }) => {
+        const cat = item.category || "Uncategorized";
+        const current = categoryMap.get(cat) || { amount: 0, count: 0 };
         current.amount += item.line_total || 0;
         current.count += 1;
-        categoryMap.set(item.category, current);
+        categoryMap.set(cat, current);
         totalAmount += item.line_total || 0;
       });
     } else {

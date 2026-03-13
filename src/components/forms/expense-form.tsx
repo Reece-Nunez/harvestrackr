@@ -82,12 +82,12 @@ export function ExpenseForm({ expense, mode = "create" }: ExpenseFormProps) {
         date: new Date(expense.date),
         vendor: expense.vendor || "",
         notes: expense.notes || "",
-        lineItems: expense.expense_line_items.map((item) => ({
+        lineItems: expense.expense_line_items.map((item: any) => ({
           id: item.id,
-          item: item.item,
-          category: item.category as (typeof EXPENSE_CATEGORIES)[number],
+          item: item.description || item.item || "",
+          category: (item.category || "Supplies Purchased") as (typeof EXPENSE_CATEGORIES)[number],
           quantity: String(item.quantity),
-          unitCost: String(item.unit_cost),
+          unitCost: String(item.unit_price ?? item.unit_cost ?? 0),
         })),
         receiptImage: null,
       };

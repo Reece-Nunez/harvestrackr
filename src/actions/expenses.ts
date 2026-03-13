@@ -73,15 +73,15 @@ export async function createExpense(
     }
 
     // Create line items
+    // Note: line_total is GENERATED ALWAYS in the DB (quantity * unit_price) — do not insert it
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: expense.id,
-      item: item.item,
       description: item.item,
+      item: item.item,
       category: item.category,
       quantity: item.quantity,
-      unit_cost: item.unitCost,
       unit_price: item.unitCost,
-      line_total: item.lineTotal,
+      unit_cost: item.unitCost,
     }));
 
     const { error: lineItemsError } = await supabase
@@ -173,15 +173,15 @@ export async function updateExpense(
     }
 
     // Create new line items
+    // Note: line_total is GENERATED ALWAYS in the DB (quantity * unit_price) — do not insert it
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: id,
-      item: item.item,
       description: item.item,
+      item: item.item,
       category: item.category,
       quantity: item.quantity,
-      unit_cost: item.unitCost,
       unit_price: item.unitCost,
-      line_total: item.lineTotal,
+      unit_cost: item.unitCost,
     }));
 
     const { error: lineItemsError } = await supabase
@@ -422,7 +422,7 @@ export async function getExpenses(
   if (category && data) {
     filteredData = data.filter((expense) =>
       expense.expense_line_items?.some(
-        (item: { category: string }) => item.category === category
+        (item: { category: string | null }) => item.category === category
       )
     );
   }

@@ -47,6 +47,7 @@ export async function importExpenses(
       const grandTotal = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
 
       // Create expense
+      const description = lineItems.map((i) => i.item).join(", ") || `Purchase from ${firstItem.vendor}`;
       const { data: expense, error: expenseError } = await supabase
         .from("expenses")
         .insert({
@@ -54,6 +55,7 @@ export async function importExpenses(
           user_id: user.id,
           date: firstItem.date,
           vendor: firstItem.vendor,
+          description,
           notes: firstItem.notes || null,
           grand_total: grandTotal,
         })
@@ -66,13 +68,15 @@ export async function importExpenses(
       }
 
       // Create line items
+      // Note: line_total is GENERATED ALWAYS in the DB (quantity * unit_price) — do not insert it
       const lineItemsToInsert = lineItems.map((item) => ({
         expense_id: expense.id,
+        description: item.item,
         item: item.item,
         category: item.category,
         quantity: item.quantity,
+        unit_price: item.unitCost,
         unit_cost: item.unitCost,
-        line_total: item.lineTotal,
       }));
 
       const { error: lineItemsError } = await supabase

@@ -436,32 +436,42 @@ export interface Database {
         Row: {
           id: string;
           expense_id: string;
-          item: string;
-          category: string;
+          description: string;
+          item: string | null;
+          category: string | null;
           quantity: number;
-          unit_cost: number;
+          unit_price: number;
+          unit_cost: number | null;
           line_total: number;
+          unit: string | null;
           created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           expense_id: string;
-          item: string;
-          category: string;
-          quantity: number;
-          unit_cost: number;
-          line_total: number;
+          description: string;
+          item?: string | null;
+          category?: string | null;
+          quantity?: number;
+          unit_price: number;
+          unit_cost?: number | null;
+          unit?: string | null;
           created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           expense_id?: string;
-          item?: string;
-          category?: string;
+          description?: string;
+          item?: string | null;
+          category?: string | null;
           quantity?: number;
-          unit_cost?: number;
-          line_total?: number;
+          unit_price?: number;
+          unit_cost?: number | null;
+          unit?: string | null;
           created_at?: string;
+          updated_at?: string;
         };
         Relationships: [
           {

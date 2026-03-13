@@ -110,12 +110,16 @@ export interface ExpenseWithLineItems {
   expense_line_items: {
     id: string;
     expense_id: string;
-    item: string;
-    category: string;
+    description: string;
+    item: string | null;
+    category: string | null;
     quantity: number;
-    unit_cost: number;
+    unit_price: number;
+    unit_cost: number | null;
     line_total: number;
+    unit: string | null;
     created_at: string;
+    updated_at: string;
   }[];
 }
 
