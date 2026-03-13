@@ -4,7 +4,26 @@
 -- The original schema (00001) used farm_members for RLS policies, but the
 -- simplified schema (00002) introduced team_members as the actual table.
 -- This migration updates all remaining policies that still reference farm_members.
+-- Also fixes team_members own policies to avoid circular RLS recursion.
 -- ============================================================================
+
+-- team_members: simple non-recursive policies to avoid circular dependency
+DROP POLICY IF EXISTS "team_members_select" ON team_members;
+DROP POLICY IF EXISTS "team_members_all" ON team_members;
+DROP POLICY IF EXISTS "team_members_manage" ON team_members;
+DROP POLICY IF EXISTS "team_members_insert" ON team_members;
+DROP POLICY IF EXISTS "team_members_update" ON team_members;
+DROP POLICY IF EXISTS "team_members_delete" ON team_members;
+DROP POLICY IF EXISTS "Users can view team members for their farms" ON team_members;
+
+CREATE POLICY "team_members_select" ON team_members FOR SELECT
+USING (auth.uid() IS NOT NULL);
+CREATE POLICY "team_members_insert" ON team_members FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "team_members_update" ON team_members FOR UPDATE
+USING (auth.uid() IS NOT NULL);
+CREATE POLICY "team_members_delete" ON team_members FOR DELETE
+USING (auth.uid() IS NOT NULL);
 
 -- farms SELECT
 DROP POLICY IF EXISTS "Users can view farms they are members of" ON farms;
