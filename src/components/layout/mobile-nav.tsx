@@ -39,14 +39,12 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const leftNavItems: NavItem[] = [
+const navItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: Home },
   { title: "Expenses", href: "/expenses", icon: Receipt },
-];
-
-const rightNavItems: NavItem[] = [
+  // Center slot reserved for + button
   { title: "Income", href: "/income", icon: DollarSign },
-  { title: "Inventory", href: "/inventory/livestock", icon: Warehouse },
+  { title: "More", href: "#more", icon: MoreHorizontal },
 ];
 
 const quickActions: NavItem[] = [
@@ -159,28 +157,23 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
         !isVisible && "translate-y-full"
       )}
     >
-      <div className="flex h-16 items-center justify-around px-2 safe-area-pb">
-        {leftNavItems.map((item) => {
+      <div className="grid h-16 grid-cols-5 items-center safe-area-pb">
+        {/* Dashboard */}
+        {navItems.slice(0, 2).map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
-
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
+                "relative flex flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon
-                className={cn(
-                  "h-5 w-5 transition-transform",
-                  active && "scale-110"
-                )}
-              />
+              <Icon className={cn("h-5 w-5", active && "scale-110")} />
               <span className={cn("truncate", active && "font-medium")}>
                 {item.title}
               </span>
@@ -191,12 +184,12 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
           );
         })}
 
-        {/* Center Quick Actions Button */}
+        {/* Center + Button — raised above the navbar */}
         <Sheet open={quickActionsOpen} onOpenChange={setQuickActionsOpen}>
           <SheetTrigger asChild>
-            <button className="flex flex-col items-center justify-center -mt-5">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg">
-                <Plus className="h-6 w-6" />
+            <button className="relative flex items-center justify-center">
+              <span className="absolute -top-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg border-4 border-background">
+                <Plus className="h-7 w-7" />
               </span>
             </button>
           </SheetTrigger>
@@ -225,27 +218,23 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
           </SheetContent>
         </Sheet>
 
-        {rightNavItems.map((item) => {
+        {/* Income */}
+        {(() => {
+          const item = navItems[2];
           const Icon = item.icon;
           const active = isActive(item.href);
-
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
+                "relative flex flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon
-                className={cn(
-                  "h-5 w-5 transition-transform",
-                  active && "scale-110"
-                )}
-              />
+              <Icon className={cn("h-5 w-5", active && "scale-110")} />
               <span className={cn("truncate", active && "font-medium")}>
                 {item.title}
               </span>
@@ -254,12 +243,12 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
               )}
             </Link>
           );
-        })}
+        })()}
 
-        {/* More Menu */}
+        {/* More */}
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <button className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <button className="flex flex-col items-center justify-center gap-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
               <MoreHorizontal className="h-5 w-5" />
               <span>More</span>
             </button>
