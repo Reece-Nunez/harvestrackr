@@ -28,9 +28,10 @@ async function getCurrentFarmId() {
   if (!user) return null;
 
   const { data: member } = await supabase
-    .from("farm_members")
+    .from("team_members")
     .select("farm_id")
     .eq("user_id", user.id)
+    .eq("is_active", true)
     .limit(1)
     .single();
 

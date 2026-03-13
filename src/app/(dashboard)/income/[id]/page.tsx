@@ -57,10 +57,11 @@ async function getIncome(id: string) {
   if (farm.owner_id !== user.id) {
     // Check if user is a team member
     const { data: teamAccess } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("id")
       .eq("farm_id", farm.id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (!teamAccess) {

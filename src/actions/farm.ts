@@ -117,11 +117,12 @@ export async function createFarm(
       return { success: false, error: `Failed to create farm: ${farmError.message}` };
     }
 
-    // Create owner as farm member
-    const { error: memberError } = await supabase.from("farm_members").insert({
+    // Create owner as team member
+    const { error: memberError } = await supabase.from("team_members").insert({
       farm_id: farm.id,
       user_id: user.id,
       role: "OWNER" as TeamRole,
+      is_active: true,
       joined_at: new Date().toISOString(),
     });
 
@@ -169,10 +170,11 @@ export async function updateFarm(
 
     // Check if user has permission to update farm
     const { data: member, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", farmId)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !member) {
@@ -298,10 +300,13 @@ export async function deleteFarm(farmId: string): Promise<ActionResult> {
       return { success: false, error: `Failed to delete farm: ${deleteError.message}` };
     }
 
-    // Clean up farm members (CASCADE should handle this, but be explicit)
+    // Deactivate all team members
     const { error: membersError } = await supabase
-      .from("farm_members")
-      .delete()
+      .from("team_members")
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString(),
+      })
       .eq("farm_id", farmId);
 
     if (membersError) {
@@ -367,14 +372,15 @@ export async function getUserFarms() {
 
     // Get farms where user is a team member
     const { data: members, error: membersError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select(
         `
         role,
         farm:farms (*)
       `
       )
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("is_active", true);
 
     if (membersError) {
       console.error("Error fetching user farms:", membersError);

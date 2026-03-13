@@ -34,7 +34,18 @@ async function getCurrentFarmId() {
 
   if (ownedFarms?.[0]?.id) return ownedFarms[0].id;
 
-  const { data: farmMemberships } = await supabase
+  // Try team_members
+  const { data: teamMemberships } = await supabase
+    .from("team_members")
+    .select("farm_id")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .limit(1);
+
+  if (teamMemberships?.[0]?.farm_id) return teamMemberships[0].farm_id;
+
+  // Try farm_members (migration table)
+  const { data: farmMemberships } = await (supabase as any)
     .from("farm_members")
     .select("farm_id")
     .eq("user_id", user.id)

@@ -32,21 +32,23 @@ export async function getTeamMembers(
       return { success: false, error: "Unauthorized" };
     }
 
-    // Fetch team members with user info
+    // Fetch team members with user info (using hint for user_id relationship)
     const { data: teamMembers, error } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select(
         `
         *,
-        profile:profiles!farm_members_user_id_fkey (
+        user:users!team_members_user_id_fkey (
           id,
           email,
-          full_name,
+          first_name,
+          last_name,
           avatar_url
         )
       `
       )
       .eq("farm_id", farmId)
+      .eq("is_active", true)
       .order("joined_at", { ascending: true });
 
     if (error) {
@@ -55,31 +57,11 @@ export async function getTeamMembers(
     }
 
     // Transform the data to match the expected type
-    const transformedMembers: TeamMemberWithUser[] = (teamMembers || []).map((member) => {
-      const profile = member.profile as { id: string; email: string; full_name: string | null; avatar_url: string | null } | null;
-      const nameParts = (profile?.full_name || "").split(" ");
-      return {
-        id: member.id,
-        farm_id: member.farm_id,
-        user_id: member.user_id,
-        role: member.role as TeamRole,
-        permissions: null,
-        is_active: true,
-        joined_at: member.joined_at,
-        last_login_at: null,
-        invited_by: null,
-        notes: null,
-        created_at: member.created_at,
-        updated_at: member.updated_at,
-        user: profile ? {
-          id: profile.id,
-          email: profile.email,
-          first_name: nameParts[0] || null,
-          last_name: nameParts.slice(1).join(" ") || null,
-          avatar_url: profile.avatar_url,
-        } : null,
-      };
-    });
+    const transformedMembers: TeamMemberWithUser[] = (teamMembers || []).map((member) => ({
+      ...member,
+      permissions: member.permissions as Record<string, boolean> | null,
+      user: member.user as TeamMemberWithUser['user'],
+    }));
 
     return { success: true, data: transformedMembers };
   } catch (error) {
@@ -154,10 +136,11 @@ export async function inviteTeamMember(
 
     // Check if user has permission to invite
     const { data: currentMember, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", farmId)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !currentMember) {
@@ -170,13 +153,16 @@ export async function inviteTeamMember(
     }
 
     // Get user info for invitation
-    const { data: userData } = await supabase
-      .from("profiles")
-      .select("full_name")
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("first_name, last_name")
       .eq("id", user.id)
       .single();
 
-    const inviterName = userData?.full_name || user.email || "Farm Team";
+    const inviterName =
+      userData?.first_name && userData?.last_name
+        ? `${userData.first_name} ${userData.last_name}`
+        : user.email || "Farm Team";
 
     // Check if invitation already exists
     const { data: existingInvitation } = await supabase
@@ -193,17 +179,18 @@ export async function inviteTeamMember(
 
     // Check if user is already a member
     const { data: existingUser } = await supabase
-      .from("profiles")
+      .from("users")
       .select("id")
       .eq("email", email.toLowerCase())
       .single();
 
     if (existingUser) {
       const { data: existingMember } = await supabase
-        .from("farm_members")
+        .from("team_members")
         .select("id")
         .eq("farm_id", farmId)
         .eq("user_id", existingUser.id)
+        .eq("is_active", true)
         .single();
 
       if (existingMember) {
@@ -302,7 +289,7 @@ export async function updateTeamMemberRole(
 
     // Get target member info
     const { data: targetMember, error: targetError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("farm_id, role, user_id")
       .eq("id", memberId)
       .single();
@@ -313,10 +300,11 @@ export async function updateTeamMemberRole(
 
     // Check if user has permission
     const { data: currentMember, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", targetMember.farm_id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !currentMember) {
@@ -338,7 +326,7 @@ export async function updateTeamMemberRole(
 
     // Update role
     const { error: updateError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .update({
         role: validatedData.data.newRole,
         updated_at: new Date().toISOString(),
@@ -374,7 +362,7 @@ export async function removeTeamMember(memberId: string): Promise<ActionResult> 
 
     // Get target member info
     const { data: targetMember, error: targetError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("farm_id, role, user_id")
       .eq("id", memberId)
       .single();
@@ -390,10 +378,11 @@ export async function removeTeamMember(memberId: string): Promise<ActionResult> 
 
     // Check if user has permission
     const { data: currentMember, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", targetMember.farm_id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !currentMember) {
@@ -408,10 +397,13 @@ export async function removeTeamMember(memberId: string): Promise<ActionResult> 
       return { success: false, error: "You do not have permission to remove this member" };
     }
 
-    // Delete the member
+    // Soft delete - set is_active to false
     const { error: deleteError } = await supabase
-      .from("farm_members")
-      .delete()
+      .from("team_members")
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", memberId);
 
     if (deleteError) {
@@ -458,10 +450,11 @@ export async function cancelInvitation(invitationId: string): Promise<ActionResu
 
     // Check if user has permission
     const { data: currentMember, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", invitation.farm_id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !currentMember) {
@@ -523,10 +516,11 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
 
     // Check if user has permission
     const { data: currentMember, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", invitation.farm_id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !currentMember) {
@@ -618,22 +612,25 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
 
     // Check if user is already a member
     const { data: existingMember } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("id")
       .eq("farm_id", invitation.farm_id)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (existingMember) {
       return { success: false, error: "You are already a member of this farm" };
     }
 
-    // Create farm member
-    const { error: memberError } = await supabase.from("farm_members").insert({
+    // Create team member
+    const { error: memberError } = await supabase.from("team_members").insert({
       farm_id: invitation.farm_id,
       user_id: user.id,
       role: invitation.role,
+      is_active: true,
       joined_at: new Date().toISOString(),
+      invited_by: invitation.invited_by_user_id,
     });
 
     if (memberError) {
@@ -676,12 +673,13 @@ export async function getUserRole(farmId: string): Promise<ActionResult<TeamRole
       return { success: false, error: "Unauthorized" };
     }
 
-    // Get user's farm member record
+    // Get user's team member record
     const { data: member, error: memberError } = await supabase
-      .from("farm_members")
+      .from("team_members")
       .select("role")
       .eq("farm_id", farmId)
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .single();
 
     if (memberError || !member) {

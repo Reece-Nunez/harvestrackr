@@ -64,10 +64,11 @@ export async function createCustomer(
 
     if (!farmAccess) {
       const { data: teamAccess } = await supabase
-        .from("farm_members")
+        .from("team_members")
         .select("id")
         .eq("farm_id", farmId)
         .eq("user_id", user.id)
+        .eq("is_active", true)
         .single();
 
       if (!teamAccess) {
