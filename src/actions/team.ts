@@ -648,6 +648,18 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
     // Use admin client to bypass RLS for insert/update
     const adminClient = createAdminClient();
 
+    // Ensure user exists in the users table (may not if they just signed up
+    // and the trigger only populates the profiles table)
+    await adminClient.from("users").upsert(
+      {
+        id: user.id,
+        email: user.email!,
+        first_name: user.user_metadata?.first_name || null,
+        last_name: user.user_metadata?.last_name || null,
+      },
+      { onConflict: "id" }
+    );
+
     // Create team member
     const { error: memberError } = await adminClient.from("team_members").insert({
       farm_id: invitation.farm_id,
