@@ -71,7 +71,7 @@ export async function createIncome(
 
     if (insertError) {
       console.error("Error creating income:", insertError);
-      return { success: false, error: "Failed to create income record" };
+      return { success: false, error: `Failed to create income record: ${insertError.message}` };
     }
 
     // If livestock is linked, update its status to SOLD
@@ -98,7 +98,7 @@ export async function createIncome(
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${String(error)}` };
   }
 }
 
@@ -153,7 +153,7 @@ export async function updateIncome(
 
     if (updateError) {
       console.error("Error updating income:", updateError);
-      return { success: false, error: "Failed to update income record" };
+      return { success: false, error: `Failed to update income record: ${updateError.message}` };
     }
 
     // Handle livestock status changes
@@ -186,7 +186,7 @@ export async function updateIncome(
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${String(error)}` };
   }
 }
 
@@ -228,7 +228,7 @@ export async function deleteIncome(
 
     if (deleteError) {
       console.error("Error deleting income:", deleteError);
-      return { success: false, error: "Failed to delete income record" };
+      return { success: false, error: `Failed to delete income record: ${deleteError.message}` };
     }
 
     // If livestock was linked, set it back to ACTIVE
@@ -247,7 +247,7 @@ export async function deleteIncome(
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${String(error)}` };
   }
 }
 
@@ -278,7 +278,7 @@ export async function linkLivestockToIncome(
 
     if (updateIncomeError) {
       console.error("Error linking livestock to income:", updateIncomeError);
-      return { success: false, error: "Failed to link livestock to income" };
+      return { success: false, error: `Failed to link livestock to income: ${updateIncomeError.message}` };
     }
 
     // Update the livestock status to SOLD
@@ -293,7 +293,7 @@ export async function linkLivestockToIncome(
 
     if (updateLivestockError) {
       console.error("Error updating livestock status:", updateLivestockError);
-      return { success: false, error: "Failed to update livestock status" };
+      return { success: false, error: `Failed to update livestock status: ${updateLivestockError.message}` };
     }
 
     revalidatePath("/income");
@@ -304,7 +304,7 @@ export async function linkLivestockToIncome(
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${String(error)}` };
   }
 }
 

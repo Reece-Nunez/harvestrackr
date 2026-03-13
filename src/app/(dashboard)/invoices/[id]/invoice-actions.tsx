@@ -49,7 +49,7 @@ export function InvoiceActions({ invoice, farmId }: InvoiceActionsProps) {
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to update invoice status");
+      toast.error(error instanceof Error ? error.message : "Failed to update invoice status");
     } finally {
       setIsUpdating(false);
     }

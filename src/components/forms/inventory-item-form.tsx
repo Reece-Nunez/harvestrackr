@@ -157,7 +157,7 @@ export function InventoryItemForm({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete item");
+      toast.error(error instanceof Error ? error.message : "Failed to delete item");
     } finally {
       setIsSubmitting(false);
     }

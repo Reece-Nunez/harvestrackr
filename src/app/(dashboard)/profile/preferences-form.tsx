@@ -67,7 +67,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
       }
     } catch (error) {
       console.error("Error updating preferences:", error);
-      toast.error("Failed to update preferences");
+      toast.error(error instanceof Error ? error.message : "Failed to update preferences");
     } finally {
       setIsLoading(false);
     }

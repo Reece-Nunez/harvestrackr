@@ -114,7 +114,7 @@ export async function createFarm(
 
     if (farmError) {
       console.error("Error creating farm:", farmError);
-      return { success: false, error: "Failed to create farm" };
+      return { success: false, error: `Failed to create farm: ${farmError.message}` };
     }
 
     // Create owner as team member
@@ -130,7 +130,7 @@ export async function createFarm(
       console.error("Error creating team member:", memberError);
       // Clean up farm if team member creation fails
       await supabase.from("farms").delete().eq("id", farm.id);
-      return { success: false, error: "Failed to set up farm ownership" };
+      return { success: false, error: `Failed to set up farm ownership: ${memberError.message}` };
     }
 
     revalidatePath("/");
@@ -138,7 +138,7 @@ export async function createFarm(
     return { success: true, data: { id: farm.id } };
   } catch (error) {
     console.error("Error in createFarm:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -245,7 +245,7 @@ export async function updateFarm(
 
     if (updateError) {
       console.error("Error updating farm:", updateError);
-      return { success: false, error: "Failed to update farm" };
+      return { success: false, error: `Failed to update farm: ${updateError.message}` };
     }
 
     revalidatePath("/");
@@ -253,7 +253,7 @@ export async function updateFarm(
     return { success: true };
   } catch (error) {
     console.error("Error in updateFarm:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -297,7 +297,7 @@ export async function deleteFarm(farmId: string): Promise<ActionResult> {
 
     if (deleteError) {
       console.error("Error deleting farm:", deleteError);
-      return { success: false, error: "Failed to delete farm" };
+      return { success: false, error: `Failed to delete farm: ${deleteError.message}` };
     }
 
     // Deactivate all team members
@@ -328,7 +328,7 @@ export async function deleteFarm(farmId: string): Promise<ActionResult> {
     return { success: true };
   } catch (error) {
     console.error("Error in deleteFarm:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 

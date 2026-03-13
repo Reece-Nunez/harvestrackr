@@ -141,7 +141,7 @@ export function LivestockProfile({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete livestock");
+      toast.error(error instanceof Error ? error.message : "Failed to delete livestock");
     }
   };
 

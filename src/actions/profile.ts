@@ -56,7 +56,7 @@ export async function updateProfile(
 
     if (profileError) {
       console.error("Error updating profile:", profileError);
-      return { success: false, error: "Failed to update profile" };
+      return { success: false, error: `Failed to update profile: ${profileError.message}` };
     }
 
     // Update email in auth if changed
@@ -69,7 +69,7 @@ export async function updateProfile(
         console.error("Error updating email:", emailError);
         return {
           success: false,
-          error: "Failed to update email. Please try again.",
+          error: `Failed to update email: ${emailError.message}`,
         };
       }
 
@@ -92,7 +92,7 @@ export async function updateProfile(
     return { success: true };
   } catch (error) {
     console.error("Error in updateProfile:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -162,7 +162,7 @@ export async function uploadAvatar(
 
     if (uploadError) {
       console.error("Error uploading avatar:", uploadError);
-      return { success: false, error: "Failed to upload avatar" };
+      return { success: false, error: `Failed to upload avatar: ${uploadError.message}` };
     }
 
     // Get public URL
@@ -181,14 +181,14 @@ export async function uploadAvatar(
 
     if (updateError) {
       console.error("Error updating avatar URL:", updateError);
-      return { success: false, error: "Failed to update profile" };
+      return { success: false, error: `Failed to update profile: ${updateError.message}` };
     }
 
     revalidatePath("/profile");
     return { success: true, data: { url: publicUrl } };
   } catch (error) {
     console.error("Error in uploadAvatar:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -239,13 +239,13 @@ export async function changePassword(
 
     if (updateError) {
       console.error("Error updating password:", updateError);
-      return { success: false, error: "Failed to update password" };
+      return { success: false, error: `Failed to update password: ${updateError.message}` };
     }
 
     return { success: true };
   } catch (error) {
     console.error("Error in changePassword:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -301,14 +301,14 @@ export async function updatePreferences(
 
     if (updateError) {
       console.error("Error updating preferences:", updateError);
-      return { success: false, error: "Failed to update preferences" };
+      return { success: false, error: `Failed to update preferences: ${updateError.message}` };
     }
 
     revalidatePath("/profile");
     return { success: true };
   } catch (error) {
     console.error("Error in updatePreferences:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 

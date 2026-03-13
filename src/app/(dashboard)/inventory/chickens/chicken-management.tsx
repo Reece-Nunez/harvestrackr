@@ -110,7 +110,7 @@ export function ChickenManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete flock");
+      toast.error(error instanceof Error ? error.message : "Failed to delete flock");
     } finally {
       setDeleteFlockId(null);
     }
@@ -128,7 +128,7 @@ export function ChickenManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete egg log");
+      toast.error(error instanceof Error ? error.message : "Failed to delete egg log");
     }
   };
 

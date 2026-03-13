@@ -236,7 +236,7 @@ export function InvoicesList({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete invoice");
+      toast.error(error instanceof Error ? error.message : "Failed to delete invoice");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);
@@ -254,7 +254,7 @@ export function InvoicesList({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to update invoice status");
+      toast.error(error instanceof Error ? error.message : "Failed to update invoice status");
     }
   };
 

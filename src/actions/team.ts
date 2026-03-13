@@ -53,7 +53,7 @@ export async function getTeamMembers(
 
     if (error) {
       console.error("Error fetching team members:", error);
-      return { success: false, error: "Failed to fetch team members" };
+      return { success: false, error: `Failed to fetch team members: ${error.message}` };
     }
 
     // Transform the data to match the expected type
@@ -66,7 +66,7 @@ export async function getTeamMembers(
     return { success: true, data: transformedMembers };
   } catch (error) {
     console.error("Error in getTeamMembers:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -96,13 +96,13 @@ export async function getPendingInvitations(
 
     if (error) {
       console.error("Error fetching invitations:", error);
-      return { success: false, error: "Failed to fetch invitations" };
+      return { success: false, error: `Failed to fetch invitations: ${error.message}` };
     }
 
     return { success: true, data: invitations as TeamInvitationWithInviter[] };
   } catch (error) {
     console.error("Error in getPendingInvitations:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -257,7 +257,7 @@ export async function inviteTeamMember(
     return { success: true, data: { id: invitation.id } };
   } catch (error) {
     console.error("Error in inviteTeamMember:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -335,14 +335,14 @@ export async function updateTeamMemberRole(
 
     if (updateError) {
       console.error("Error updating role:", updateError);
-      return { success: false, error: "Failed to update role" };
+      return { success: false, error: `Failed to update role: ${updateError.message}` };
     }
 
     revalidatePath("/team");
     return { success: true };
   } catch (error) {
     console.error("Error in updateTeamMemberRole:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -408,14 +408,14 @@ export async function removeTeamMember(memberId: string): Promise<ActionResult> 
 
     if (deleteError) {
       console.error("Error removing member:", deleteError);
-      return { success: false, error: "Failed to remove team member" };
+      return { success: false, error: `Failed to remove team member: ${deleteError.message}` };
     }
 
     revalidatePath("/team");
     return { success: true };
   } catch (error) {
     console.error("Error in removeTeamMember:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -474,14 +474,14 @@ export async function cancelInvitation(invitationId: string): Promise<ActionResu
 
     if (cancelError) {
       console.error("Error cancelling invitation:", cancelError);
-      return { success: false, error: "Failed to cancel invitation" };
+      return { success: false, error: `Failed to cancel invitation: ${cancelError.message}` };
     }
 
     revalidatePath("/team");
     return { success: true };
   } catch (error) {
     console.error("Error in cancelInvitation:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -543,7 +543,7 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
 
     if (updateError) {
       console.error("Error resending invitation:", updateError);
-      return { success: false, error: "Failed to resend invitation" };
+      return { success: false, error: `Failed to resend invitation: ${updateError.message}` };
     }
 
     // Resend invitation email
@@ -566,7 +566,7 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
     return { success: true };
   } catch (error) {
     console.error("Error in resendInvitation:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -635,7 +635,7 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
 
     if (memberError) {
       console.error("Error creating team member:", memberError);
-      return { success: false, error: "Failed to join the farm" };
+      return { success: false, error: `Failed to join the farm: ${memberError.message}` };
     }
 
     // Update invitation status
@@ -655,7 +655,7 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
     return { success: true };
   } catch (error) {
     console.error("Error in acceptInvitation:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -689,6 +689,6 @@ export async function getUserRole(farmId: string): Promise<ActionResult<TeamRole
     return { success: true, data: member.role as TeamRole };
   } catch (error) {
     console.error("Error in getUserRole:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }

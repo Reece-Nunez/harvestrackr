@@ -145,7 +145,7 @@ export function FieldForm({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete field");
+      toast.error(error instanceof Error ? error.message : "Failed to delete field");
     } finally {
       setIsSubmitting(false);
     }

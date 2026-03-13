@@ -158,7 +158,7 @@ export function CustomersList({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete customer");
+      toast.error(error instanceof Error ? error.message : "Failed to delete customer");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);

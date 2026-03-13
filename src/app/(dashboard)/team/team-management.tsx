@@ -109,7 +109,7 @@ export function TeamManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to update role");
+      toast.error(error instanceof Error ? error.message : "Failed to update role");
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +129,7 @@ export function TeamManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to remove team member");
+      toast.error(error instanceof Error ? error.message : "Failed to remove team member");
     } finally {
       setIsLoading(false);
       setDeleteDialogOpen(false);
@@ -149,7 +149,7 @@ export function TeamManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to cancel invitation");
+      toast.error(error instanceof Error ? error.message : "Failed to cancel invitation");
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +166,7 @@ export function TeamManagement({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to resend invitation");
+      toast.error(error instanceof Error ? error.message : "Failed to resend invitation");
     } finally {
       setIsLoading(false);
     }

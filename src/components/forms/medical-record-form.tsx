@@ -157,7 +157,7 @@ export function MedicalRecordForm({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete medical record");
+      toast.error(error instanceof Error ? error.message : "Failed to delete medical record");
     } finally {
       setIsSubmitting(false);
     }

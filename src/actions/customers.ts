@@ -97,14 +97,14 @@ export async function createCustomer(
 
     if (customerError) {
       console.error("Error creating customer:", customerError);
-      return { success: false, error: "Failed to create customer" };
+      return { success: false, error: `Failed to create customer: ${customerError.message}` };
     }
 
     revalidatePath("/customers");
     return { success: true, data: { id: customer.id } };
   } catch (error) {
     console.error("Error in createCustomer:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -180,7 +180,7 @@ export async function updateCustomer(
 
     if (updateError) {
       console.error("Error updating customer:", updateError);
-      return { success: false, error: "Failed to update customer" };
+      return { success: false, error: `Failed to update customer: ${updateError.message}` };
     }
 
     revalidatePath("/customers");
@@ -188,7 +188,7 @@ export async function updateCustomer(
     return { success: true };
   } catch (error) {
     console.error("Error in updateCustomer:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -243,14 +243,14 @@ export async function deleteCustomer(
 
     if (deleteError) {
       console.error("Error deleting customer:", deleteError);
-      return { success: false, error: "Failed to delete customer" };
+      return { success: false, error: `Failed to delete customer: ${deleteError.message}` };
     }
 
     revalidatePath("/customers");
     return { success: true };
   } catch (error) {
     console.error("Error in deleteCustomer:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 

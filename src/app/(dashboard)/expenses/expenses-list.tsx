@@ -198,7 +198,7 @@ export function ExpensesList({
         toast.error(result.error);
       }
     } catch (error) {
-      toast.error("Failed to delete expense");
+      toast.error(error instanceof Error ? error.message : "Failed to delete expense");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);

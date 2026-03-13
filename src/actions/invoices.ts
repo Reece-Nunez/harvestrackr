@@ -115,7 +115,7 @@ export async function createInvoice(
 
     if (invoiceError) {
       console.error("Error creating invoice:", invoiceError);
-      return { success: false, error: "Failed to create invoice" };
+      return { success: false, error: `Failed to create invoice: ${invoiceError.message}` };
     }
 
     // Create invoice items
@@ -137,14 +137,14 @@ export async function createInvoice(
       console.error("Error creating invoice items:", itemsError);
       // Clean up the invoice if items failed
       await supabase.from("invoices").delete().eq("id", invoice.id);
-      return { success: false, error: "Failed to create invoice items" };
+      return { success: false, error: `Failed to create invoice items: ${itemsError.message}` };
     }
 
     revalidatePath("/invoices");
     return { success: true, data: { id: invoice.id } };
   } catch (error) {
     console.error("Error in createInvoice:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -225,7 +225,7 @@ export async function updateInvoice(
 
     if (updateError) {
       console.error("Error updating invoice:", updateError);
-      return { success: false, error: "Failed to update invoice" };
+      return { success: false, error: `Failed to update invoice: ${updateError.message}` };
     }
 
     // Delete existing items
@@ -236,7 +236,7 @@ export async function updateInvoice(
 
     if (deleteError) {
       console.error("Error deleting invoice items:", deleteError);
-      return { success: false, error: "Failed to update invoice items" };
+      return { success: false, error: `Failed to update invoice items: ${deleteError.message}` };
     }
 
     // Create new items
@@ -256,7 +256,7 @@ export async function updateInvoice(
 
     if (itemsError) {
       console.error("Error creating invoice items:", itemsError);
-      return { success: false, error: "Failed to update invoice items" };
+      return { success: false, error: `Failed to update invoice items: ${itemsError.message}` };
     }
 
     revalidatePath("/invoices");
@@ -264,7 +264,7 @@ export async function updateInvoice(
     return { success: true };
   } catch (error) {
     console.error("Error in updateInvoice:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -324,7 +324,7 @@ export async function updateInvoiceStatus(
 
     if (updateError) {
       console.error("Error updating invoice status:", updateError);
-      return { success: false, error: "Failed to update invoice status" };
+      return { success: false, error: `Failed to update invoice status: ${updateError.message}` };
     }
 
     revalidatePath("/invoices");
@@ -332,7 +332,7 @@ export async function updateInvoiceStatus(
     return { success: true };
   } catch (error) {
     console.error("Error in updateInvoiceStatus:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -373,7 +373,7 @@ export async function deleteInvoice(
 
     if (itemsError) {
       console.error("Error deleting invoice items:", itemsError);
-      return { success: false, error: "Failed to delete invoice" };
+      return { success: false, error: `Failed to delete invoice: ${itemsError.message}` };
     }
 
     // Delete invoice
@@ -384,14 +384,14 @@ export async function deleteInvoice(
 
     if (deleteError) {
       console.error("Error deleting invoice:", deleteError);
-      return { success: false, error: "Failed to delete invoice" };
+      return { success: false, error: `Failed to delete invoice: ${deleteError.message}` };
     }
 
     revalidatePath("/invoices");
     return { success: true };
   } catch (error) {
     console.error("Error in deleteInvoice:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 

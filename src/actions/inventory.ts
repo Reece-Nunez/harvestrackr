@@ -82,7 +82,7 @@ export async function createLivestock(
 
     if (error) {
       console.error("Error creating livestock:", error);
-      return { success: false, error: "Failed to create livestock" };
+      return { success: false, error: `Failed to create livestock: ${error.message}` };
     }
 
     revalidatePath("/inventory/livestock");
@@ -90,7 +90,7 @@ export async function createLivestock(
     return { success: true, data: { id: livestock.id } };
   } catch (error) {
     console.error("Error in createLivestock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -140,7 +140,7 @@ export async function updateLivestock(
 
     if (error) {
       console.error("Error updating livestock:", error);
-      return { success: false, error: "Failed to update livestock" };
+      return { success: false, error: `Failed to update livestock: ${error.message}` };
     }
 
     revalidatePath("/inventory/livestock");
@@ -149,7 +149,7 @@ export async function updateLivestock(
     return { success: true };
   } catch (error) {
     console.error("Error in updateLivestock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -186,7 +186,7 @@ export async function deleteLivestock(
 
     if (error) {
       console.error("Error deleting livestock:", error);
-      return { success: false, error: "Failed to delete livestock" };
+      return { success: false, error: `Failed to delete livestock: ${error.message}` };
     }
 
     revalidatePath("/inventory/livestock");
@@ -194,7 +194,7 @@ export async function deleteLivestock(
     return { success: true };
   } catch (error) {
     console.error("Error in deleteLivestock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -338,14 +338,14 @@ export async function createMedicalRecord(
 
     if (error) {
       console.error("Error creating medical record:", error);
-      return { success: false, error: "Failed to create medical record" };
+      return { success: false, error: `Failed to create medical record: ${error.message}` };
     }
 
     revalidatePath(`/inventory/livestock/${livestockId}`);
     return { success: true, data: { id: record.id } };
   } catch (error) {
     console.error("Error in createMedicalRecord:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -391,14 +391,14 @@ export async function updateMedicalRecord(
 
     if (error) {
       console.error("Error updating medical record:", error);
-      return { success: false, error: "Failed to update medical record" };
+      return { success: false, error: `Failed to update medical record: ${error.message}` };
     }
 
     revalidatePath(`/inventory/livestock/${livestockId}`);
     return { success: true };
   } catch (error) {
     console.error("Error in updateMedicalRecord:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -425,14 +425,14 @@ export async function deleteMedicalRecord(
 
     if (error) {
       console.error("Error deleting medical record:", error);
-      return { success: false, error: "Failed to delete medical record" };
+      return { success: false, error: `Failed to delete medical record: ${error.message}` };
     }
 
     revalidatePath(`/inventory/livestock/${livestockId}`);
     return { success: true };
   } catch (error) {
     console.error("Error in deleteMedicalRecord:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -477,7 +477,7 @@ export async function createChickenFlock(
 
     if (error) {
       console.error("Error creating chicken flock:", error);
-      return { success: false, error: "Failed to create chicken flock" };
+      return { success: false, error: `Failed to create chicken flock: ${error.message}` };
     }
 
     revalidatePath("/inventory/chickens");
@@ -485,7 +485,7 @@ export async function createChickenFlock(
     return { success: true, data: { id: flock.id } };
   } catch (error) {
     console.error("Error in createChickenFlock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -528,7 +528,7 @@ export async function updateChickenFlock(
 
     if (error) {
       console.error("Error updating chicken flock:", error);
-      return { success: false, error: "Failed to update chicken flock" };
+      return { success: false, error: `Failed to update chicken flock: ${error.message}` };
     }
 
     revalidatePath("/inventory/chickens");
@@ -536,7 +536,7 @@ export async function updateChickenFlock(
     return { success: true };
   } catch (error) {
     console.error("Error in updateChickenFlock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -566,7 +566,7 @@ export async function deleteChickenFlock(
 
     if (error) {
       console.error("Error deleting chicken flock:", error);
-      return { success: false, error: "Failed to delete chicken flock" };
+      return { success: false, error: `Failed to delete chicken flock: ${error.message}` };
     }
 
     revalidatePath("/inventory/chickens");
@@ -574,7 +574,7 @@ export async function deleteChickenFlock(
     return { success: true };
   } catch (error) {
     console.error("Error in deleteChickenFlock:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -637,14 +637,14 @@ export async function createEggLog(
 
     if (error) {
       console.error("Error creating egg log:", error);
-      return { success: false, error: "Failed to create egg log" };
+      return { success: false, error: `Failed to create egg log: ${error.message}` };
     }
 
     revalidatePath("/inventory/chickens");
     return { success: true, data: { id: log.id } };
   } catch (error) {
     console.error("Error in createEggLog:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -671,14 +671,14 @@ export async function deleteEggLog(
 
     if (error) {
       console.error("Error deleting egg log:", error);
-      return { success: false, error: "Failed to delete egg log" };
+      return { success: false, error: `Failed to delete egg log: ${error.message}` };
     }
 
     revalidatePath("/inventory/chickens");
     return { success: true };
   } catch (error) {
     console.error("Error in deleteEggLog:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -746,7 +746,7 @@ export async function createField(
 
     if (error) {
       console.error("Error creating field:", error);
-      return { success: false, error: "Failed to create field" };
+      return { success: false, error: `Failed to create field: ${error.message}` };
     }
 
     revalidatePath("/inventory/fields");
@@ -754,7 +754,7 @@ export async function createField(
     return { success: true, data: { id: field.id } };
   } catch (error) {
     console.error("Error in createField:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -797,7 +797,7 @@ export async function updateField(
 
     if (error) {
       console.error("Error updating field:", error);
-      return { success: false, error: "Failed to update field" };
+      return { success: false, error: `Failed to update field: ${error.message}` };
     }
 
     revalidatePath("/inventory/fields");
@@ -805,7 +805,7 @@ export async function updateField(
     return { success: true };
   } catch (error) {
     console.error("Error in updateField:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -838,7 +838,7 @@ export async function deleteField(
 
     if (error) {
       console.error("Error deleting field:", error);
-      return { success: false, error: "Failed to delete field" };
+      return { success: false, error: `Failed to delete field: ${error.message}` };
     }
 
     revalidatePath("/inventory/fields");
@@ -847,7 +847,7 @@ export async function deleteField(
     return { success: true };
   } catch (error) {
     console.error("Error in deleteField:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -918,7 +918,7 @@ export async function createInventoryItem(
 
     if (error) {
       console.error("Error creating inventory item:", error);
-      return { success: false, error: "Failed to create inventory item" };
+      return { success: false, error: `Failed to create inventory item: ${error.message}` };
     }
 
     revalidatePath("/inventory/items");
@@ -926,7 +926,7 @@ export async function createInventoryItem(
     return { success: true, data: { id: item.id } };
   } catch (error) {
     console.error("Error in createInventoryItem:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -973,7 +973,7 @@ export async function updateInventoryItem(
 
     if (error) {
       console.error("Error updating inventory item:", error);
-      return { success: false, error: "Failed to update inventory item" };
+      return { success: false, error: `Failed to update inventory item: ${error.message}` };
     }
 
     revalidatePath("/inventory/items");
@@ -981,7 +981,7 @@ export async function updateInventoryItem(
     return { success: true };
   } catch (error) {
     console.error("Error in updateInventoryItem:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -1008,7 +1008,7 @@ export async function deleteInventoryItem(
 
     if (error) {
       console.error("Error deleting inventory item:", error);
-      return { success: false, error: "Failed to delete inventory item" };
+      return { success: false, error: `Failed to delete inventory item: ${error.message}` };
     }
 
     revalidatePath("/inventory/items");
@@ -1016,7 +1016,7 @@ export async function deleteInventoryItem(
     return { success: true };
   } catch (error) {
     console.error("Error in deleteInventoryItem:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -1116,7 +1116,7 @@ export async function createLivestockFamily(
 
     if (error) {
       console.error("Error creating livestock family:", error);
-      return { success: false, error: "Failed to create family relationship" };
+      return { success: false, error: `Failed to create family relationship: ${error.message}` };
     }
 
     revalidatePath(`/inventory/livestock/${validatedData.data.parentId}`);
@@ -1124,7 +1124,7 @@ export async function createLivestockFamily(
     return { success: true, data: { id: family.id } };
   } catch (error) {
     console.error("Error in createLivestockFamily:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 
@@ -1149,14 +1149,14 @@ export async function deleteLivestockFamily(
 
     if (error) {
       console.error("Error deleting livestock family:", error);
-      return { success: false, error: "Failed to delete family relationship" };
+      return { success: false, error: `Failed to delete family relationship: ${error.message}` };
     }
 
     revalidatePath("/inventory/livestock");
     return { success: true };
   } catch (error) {
     console.error("Error in deleteLivestockFamily:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 

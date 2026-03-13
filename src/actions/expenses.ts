@@ -99,7 +99,7 @@ export async function createExpense(
     return { success: true, data: { id: expense.id } };
   } catch (error) {
     console.error("Error in createExpense:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -158,7 +158,7 @@ export async function updateExpense(
 
     if (updateError) {
       console.error("Error updating expense:", updateError);
-      return { success: false, error: "Failed to update expense" };
+      return { success: false, error: `Failed to update expense: ${updateError.message}` };
     }
 
     // Delete existing line items
@@ -169,7 +169,7 @@ export async function updateExpense(
 
     if (deleteError) {
       console.error("Error deleting line items:", deleteError);
-      return { success: false, error: "Failed to update line items" };
+      return { success: false, error: `Failed to update line items: ${deleteError.message}` };
     }
 
     // Create new line items
@@ -190,7 +190,7 @@ export async function updateExpense(
 
     if (lineItemsError) {
       console.error("Error creating line items:", lineItemsError);
-      return { success: false, error: "Failed to update line items" };
+      return { success: false, error: `Failed to update line items: ${lineItemsError.message}` };
     }
 
     revalidatePath("/expenses");
@@ -198,7 +198,7 @@ export async function updateExpense(
     return { success: true };
   } catch (error) {
     console.error("Error in updateExpense:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -239,7 +239,7 @@ export async function deleteExpense(
 
     if (lineItemsError) {
       console.error("Error deleting line items:", lineItemsError);
-      return { success: false, error: "Failed to delete expense" };
+      return { success: false, error: `Failed to delete expense: ${lineItemsError.message}` };
     }
 
     // Delete expense
@@ -250,14 +250,14 @@ export async function deleteExpense(
 
     if (deleteError) {
       console.error("Error deleting expense:", deleteError);
-      return { success: false, error: "Failed to delete expense" };
+      return { success: false, error: `Failed to delete expense: ${deleteError.message}` };
     }
 
     revalidatePath("/expenses");
     return { success: true };
   } catch (error) {
     console.error("Error in deleteExpense:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
@@ -312,7 +312,7 @@ export async function uploadReceiptImage(
 
     if (uploadError) {
       console.error("Error uploading receipt:", uploadError);
-      return { success: false, error: "Failed to upload receipt image" };
+      return { success: false, error: `Failed to upload receipt image: ${uploadError.message}` };
     }
 
     // Get public URL
@@ -323,7 +323,7 @@ export async function uploadReceiptImage(
     return { success: true, data: { url: publicUrl } };
   } catch (error) {
     console.error("Error in uploadReceiptImage:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
 
