@@ -11,8 +11,8 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Protect /dashboard/* routes - redirect to login if not authenticated
-  if (pathname.startsWith("/dashboard")) {
+  // Protect /dashboard/* and /team/* routes - redirect to login if not authenticated
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/team")) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";

@@ -198,7 +198,7 @@ export function LoginForm() {
           </div>
         </div>
 
-        <Link href="/signup" className="w-full">
+        <Link href={redirectTo !== "/dashboard" ? `/signup?redirectTo=${encodeURIComponent(redirectTo)}` : "/signup"} className="w-full">
           <Button variant="outline" className="w-full">
             Create an account
           </Button>

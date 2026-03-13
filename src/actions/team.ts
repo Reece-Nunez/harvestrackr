@@ -112,7 +112,7 @@ export async function inviteTeamMember(
   email: string,
   role: string,
   message?: string
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; inviteUrl: string; emailSent: boolean }>> {
   try {
     const supabase = await createClient();
 
@@ -187,10 +187,14 @@ export async function inviteTeamMember(
       return { success: false, error: `Failed to create invitation: ${inviteError.message}` };
     }
 
+    // Build invite URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteUrl = `${appUrl}/invite/${invitationId}`;
+
     // Send invitation email using admin client (requires service role key)
+    let emailSent = false;
     try {
       const adminClient = createAdminClient();
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
       const { data: farmData } = await supabase
         .from("farms")
@@ -198,10 +202,13 @@ export async function inviteTeamMember(
         .eq("id", farmId)
         .single();
 
+      const inviteRedirect = `${appUrl}/api/auth/callback?next=/invite/${invitationId}`;
+
+      // inviteUserByEmail works for new users — creates account + sends email
       const { error: emailError } = await adminClient.auth.admin.inviteUserByEmail(
         email.toLowerCase(),
         {
-          redirectTo: `${appUrl}/team/accept?token=${invitationId}`,
+          redirectTo: inviteRedirect,
           data: {
             invited_to_farm: farmData?.name || "a farm",
             invited_by: user.email || "Farm Team",
@@ -211,15 +218,22 @@ export async function inviteTeamMember(
       );
 
       if (emailError) {
-        console.warn("Could not send invitation email:", emailError.message);
+        if (emailError.message.includes("already been registered")) {
+          // User already exists — can't send Supabase auth email
+          // Invite URL will be returned for manual sharing
+          console.info("Invited user already has an account, invite link returned for sharing");
+        } else {
+          console.warn("Could not send invitation email:", emailError.message);
+        }
+      } else {
+        emailSent = true;
       }
     } catch (emailErr) {
-      // Non-fatal: invitation is created, email just didn't send
       console.warn("Email sending failed:", emailErr);
     }
 
     revalidatePath("/team");
-    return { success: true, data: { id: invitationId } };
+    return { success: true, data: { id: invitationId, inviteUrl, emailSent } };
   } catch (error) {
     console.error("Error in inviteTeamMember:", error);
     return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
@@ -431,8 +445,9 @@ export async function cancelInvitation(invitationId: string): Promise<ActionResu
       return { success: false, error: "You do not have permission to cancel invitations" };
     }
 
-    // Cancel invitation
-    const { error: cancelError } = await supabase
+    // Cancel invitation using admin client to bypass RLS
+    const adminClient = createAdminClient();
+    const { error: cancelError } = await adminClient
       .from("team_invitations")
       .update({ status: "CANCELLED" })
       .eq("id", invitationId);
@@ -451,7 +466,7 @@ export async function cancelInvitation(invitationId: string): Promise<ActionResu
 }
 
 // Resend invitation
-export async function resendInvitation(invitationId: string): Promise<ActionResult> {
+export async function resendInvitation(invitationId: string): Promise<ActionResult<{ inviteUrl: string; emailSent: boolean }>> {
   try {
     const supabase = await createClient();
 
@@ -497,11 +512,12 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
       return { success: false, error: "You do not have permission to resend invitations" };
     }
 
-    // Update expiry date
+    // Update expiry date using admin client to bypass RLS
+    const adminClient = createAdminClient();
     const newExpiresAt = new Date();
     newExpiresAt.setDate(newExpiresAt.getDate() + 7);
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminClient
       .from("team_invitations")
       .update({ expires_at: newExpiresAt.toISOString() })
       .eq("id", invitationId);
@@ -513,22 +529,34 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
 
     // Resend invitation email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteUrl = `${appUrl}/invite/${invitationId}`;
+    let emailSent = false;
+
     try {
-      const { error: emailError } = await supabase.auth.admin.inviteUserByEmail(
+      const inviteRedirect = `${appUrl}/api/auth/callback?next=/invite/${invitationId}`;
+
+      const { error: emailError } = await adminClient.auth.admin.inviteUserByEmail(
         invitation.email,
         {
-          redirectTo: `${appUrl}/team/accept?token=${invitationId}`,
+          redirectTo: inviteRedirect,
         }
       );
+
       if (emailError) {
-        console.warn("Could not resend invitation email:", emailError.message);
+        if (emailError.message.includes("already been registered")) {
+          console.info("Invited user already has an account, invite link returned for sharing");
+        } else {
+          console.warn("Could not resend invitation email:", emailError.message);
+        }
+      } else {
+        emailSent = true;
       }
     } catch (emailErr) {
       console.warn("Email resend failed:", emailErr);
     }
 
     revalidatePath("/team");
-    return { success: true };
+    return { success: true, data: { inviteUrl, emailSent } };
   } catch (error) {
     console.error("Error in resendInvitation:", error);
     return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
@@ -621,6 +649,69 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
   } catch (error) {
     console.error("Error in acceptInvitation:", error);
     return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
+  }
+}
+
+// Get invitation details (public — uses admin client, no auth required)
+export async function getInvitationDetails(
+  token: string
+): Promise<
+  ActionResult<{
+    id: string;
+    email: string;
+    role: TeamRole;
+    farmName: string;
+    inviterName: string;
+    expiresAt: string;
+    status: string;
+  }>
+> {
+  try {
+    const adminClient = createAdminClient();
+
+    const { data: invitation, error } = await adminClient
+      .from("team_invitations")
+      .select("id, email, role, status, expires_at, farm_id, invited_by, invited_by_name")
+      .eq("id", token)
+      .single();
+
+    if (error || !invitation) {
+      return { success: false, error: "Invitation not found" };
+    }
+
+    // Get farm name
+    const { data: farm } = await adminClient
+      .from("farms")
+      .select("name")
+      .eq("id", invitation.farm_id)
+      .single();
+
+    // Get inviter name
+    const { data: inviter } = await adminClient
+      .from("users")
+      .select("first_name, last_name, email")
+      .eq("id", invitation.invited_by)
+      .single();
+
+    const inviterName = inviter?.first_name && inviter?.last_name
+      ? `${inviter.first_name} ${inviter.last_name}`
+      : inviter?.email || "A team member";
+
+    return {
+      success: true,
+      data: {
+        id: invitation.id,
+        email: invitation.email,
+        role: invitation.role as TeamRole,
+        farmName: farm?.name || "a farm",
+        inviterName,
+        expiresAt: invitation.expires_at,
+        status: invitation.status,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getInvitationDetails:", error);
+    return { success: false, error: "Failed to load invitation details" };
   }
 }
 

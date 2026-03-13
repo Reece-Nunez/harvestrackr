@@ -91,7 +91,26 @@ export function InviteMemberForm({
       );
 
       if (result.success) {
-        toast.success(`Invitation sent to ${data.email}`);
+        const inviteData = result.data as { id: string; inviteUrl: string; emailSent: boolean } | undefined;
+        if (inviteData?.emailSent) {
+          toast.success(`Invitation email sent to ${data.email}`);
+        } else if (inviteData?.inviteUrl) {
+          // User already has an account — can't send Supabase auth email
+          // Show the link so the inviter can share it
+          toast.success("Invitation created! Share this link with them:", {
+            description: inviteData.inviteUrl,
+            duration: 15000,
+            action: {
+              label: "Copy Link",
+              onClick: () => {
+                navigator.clipboard.writeText(inviteData.inviteUrl);
+                toast.success("Link copied to clipboard");
+              },
+            },
+          });
+        } else {
+          toast.success("Invitation created");
+        }
         form.reset();
         onOpenChange(false);
         onSuccess?.();

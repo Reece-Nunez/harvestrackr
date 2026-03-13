@@ -12,6 +12,7 @@ import {
   Shield,
   Users,
   Trash2,
+  Link as LinkIcon,
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow, format } from "date-fns";
@@ -160,7 +161,24 @@ export function TeamManagement({
     try {
       const result = await resendInvitation(invitationId);
       if (result.success) {
-        toast.success("Invitation resent");
+        const resendData = result.data as { inviteUrl: string; emailSent: boolean } | undefined;
+        if (resendData?.emailSent) {
+          toast.success("Invitation email resent");
+        } else if (resendData?.inviteUrl) {
+          toast.success("Share this invite link with them:", {
+            description: resendData.inviteUrl,
+            duration: 15000,
+            action: {
+              label: "Copy Link",
+              onClick: () => {
+                navigator.clipboard.writeText(resendData.inviteUrl);
+                toast.success("Link copied to clipboard");
+              },
+            },
+          });
+        } else {
+          toast.success("Invitation updated");
+        }
         router.refresh();
       } else {
         toast.error(result.error);
@@ -429,6 +447,19 @@ export function TeamManagement({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const appUrl = window.location.origin;
+                        const url = `${appUrl}/invite/${invitation.id}`;
+                        navigator.clipboard.writeText(url);
+                        toast.success("Invite link copied to clipboard");
+                      }}
+                    >
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      Copy Link
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
