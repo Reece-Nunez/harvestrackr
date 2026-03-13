@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = "HarvesTrackr <noreply@nunezdev.com>";
+const FROM_EMAIL = "HarvesTrackr <noreply@harvestrackr.com>";
 
 interface InviteEmailParams {
   to: string;
