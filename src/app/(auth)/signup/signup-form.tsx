@@ -95,7 +95,7 @@ export function SignupForm() {
         const loginUrl = redirectTo
           ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
           : "/login";
-        router.push(loginUrl);
+        window.location.href = loginUrl;
         return;
       }
 
@@ -103,8 +103,9 @@ export function SignupForm() {
       sendWelcomeEmailAction(data.email, data.firstName).catch(() => {});
 
       toast.success("Account created! Welcome to HarvesTrackr.");
-      router.push(redirectTo || "/dashboard");
-      router.refresh();
+      const destination = redirectTo || "/dashboard";
+      // Use hard navigation to ensure redirect works after auth state change
+      window.location.href = destination;
     } catch (error) {
       toast.error("An unexpected error occurred. Please try again.");
       console.error("Signup error:", error);
