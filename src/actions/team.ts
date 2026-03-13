@@ -645,8 +645,11 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
       return { success: false, error: "You are already a member of this farm" };
     }
 
+    // Use admin client to bypass RLS for insert/update
+    const adminClient = createAdminClient();
+
     // Create team member
-    const { error: memberError } = await supabase.from("team_members").insert({
+    const { error: memberError } = await adminClient.from("team_members").insert({
       farm_id: invitation.farm_id,
       user_id: user.id,
       role: invitation.role,
@@ -661,7 +664,7 @@ export async function acceptInvitation(token: string): Promise<ActionResult> {
     }
 
     // Update invitation status
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminClient
       .from("team_invitations")
       .update({
         status: "ACCEPTED",
