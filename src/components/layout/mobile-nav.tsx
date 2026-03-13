@@ -39,11 +39,20 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const primaryNavItems: NavItem[] = [
+const leftNavItems: NavItem[] = [
   { title: "Dashboard", href: "/", icon: Home },
   { title: "Expenses", href: "/expenses", icon: Receipt },
+];
+
+const rightNavItems: NavItem[] = [
   { title: "Income", href: "/income", icon: DollarSign },
   { title: "Inventory", href: "/inventory/livestock", icon: Warehouse },
+];
+
+const quickActions: NavItem[] = [
+  { title: "Scan Receipt", href: "/scan-receipt", icon: ScanLine },
+  { title: "Add Expense", href: "/expenses/new", icon: Receipt },
+  { title: "Add Income", href: "/income/new", icon: DollarSign },
 ];
 
 const moreNavItems: NavItem[] = [
@@ -82,6 +91,7 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -150,7 +160,72 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
       )}
     >
       <div className="flex h-16 items-center justify-around px-2 safe-area-pb">
-        {primaryNavItems.map((item) => {
+        {leftNavItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
+                active
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Icon
+                className={cn(
+                  "h-5 w-5 transition-transform",
+                  active && "scale-110"
+                )}
+              />
+              <span className={cn("truncate", active && "font-medium")}>
+                {item.title}
+              </span>
+              {active && (
+                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Center Quick Actions Button */}
+        <Sheet open={quickActionsOpen} onOpenChange={setQuickActionsOpen}>
+          <SheetTrigger asChild>
+            <button className="flex flex-col items-center justify-center -mt-5">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg">
+                <Plus className="h-6 w-6" />
+              </span>
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-3xl" showHandle>
+            <SheetHeader className="text-left">
+              <SheetTitle>Quick Actions</SheetTitle>
+            </SheetHeader>
+            <div className="grid grid-cols-3 gap-4 py-6">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    onClick={() => setQuickActionsOpen(false)}
+                    className="flex flex-col items-center gap-2 rounded-xl p-4 transition-colors hover:bg-accent"
+                  >
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span className="text-xs font-medium text-center">{action.title}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {rightNavItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
 

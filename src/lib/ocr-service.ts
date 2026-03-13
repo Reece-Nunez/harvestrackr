@@ -104,30 +104,39 @@ function compressImage(file: File, maxWidthOrHeight = 1600, quality = 0.7): Prom
 }
 
 /**
- * Sends a receipt image to the AI-powered scanning API route and returns structured data.
+ * Sends a receipt image or PDF to the AI-powered scanning API route and returns structured data.
  *
  * Requires an internet connection and a configured ANTHROPIC_API_KEY on the server.
  */
 export async function processReceiptImage(
-  imageFile: File,
+  file: File,
   onProgress?: (progress: number) => void
 ): Promise<ParsedReceiptData> {
-  if (!imageFile) {
-    throw new Error("No image file provided.");
+  if (!file) {
+    throw new Error("No file provided.");
   }
 
-  // Step 1: Compress & convert to base64
+  const isPdf = file.type === "application/pdf";
+
   onProgress?.(10);
-  const compressed = await compressImage(imageFile);
-  onProgress?.(20);
-  const base64Image = await fileToBase64(compressed);
+
+  let base64Data: string;
+  if (isPdf) {
+    // PDFs don't need image compression — send as-is
+    base64Data = await fileToBase64(file);
+  } else {
+    // Compress images to stay under Vercel's body limit
+    const compressed = await compressImage(file);
+    base64Data = await fileToBase64(compressed);
+  }
+
   onProgress?.(25);
 
-  // Step 2: Send to API route
+  // Send to API route
   const response = await fetch("/api/scan-receipt", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: base64Image }),
+    body: JSON.stringify({ image: base64Data }),
   });
 
   onProgress?.(80);

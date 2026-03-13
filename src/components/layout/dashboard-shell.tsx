@@ -10,14 +10,9 @@ import {
   Sun,
   Moon,
   Monitor,
-  Plus,
-  ScanLine,
-  Receipt,
-  DollarSign,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useFarm } from "@/components/providers/farm-provider";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
@@ -85,7 +80,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const { user, currentFarm } = useFarm();
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("sidebarCollapsed", false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [fabOpen, setFabOpen] = useState(false);
   const mounted = useMounted();
 
   // Toggle sidebar state
@@ -116,27 +110,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
         system: <Monitor className="h-4 w-4" />,
       }[theme || "system"]
     : <Monitor className="h-4 w-4" />;
-
-  const fabActions = [
-    {
-      label: "Scan Receipt",
-      icon: ScanLine,
-      href: "/scan-receipt",
-      color: "bg-purple-500 hover:bg-purple-600 text-white",
-    },
-    {
-      label: "Add Expense",
-      icon: Receipt,
-      href: "/expenses/new",
-      color: "bg-orange-500 hover:bg-orange-600 text-white",
-    },
-    {
-      label: "Add Income",
-      icon: DollarSign,
-      href: "/income/new",
-      color: "bg-blue-500 hover:bg-blue-600 text-white",
-    },
-  ];
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -273,70 +246,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
       {/* Mobile Bottom Navigation */}
       <MobileNav onSignOut={handleSignOut} />
-
-      {/* FAB (Floating Action Button) - Mobile Only */}
-      <div className="fixed bottom-20 right-4 z-50 md:hidden">
-        {/* FAB Menu Items */}
-        <div
-          className={cn(
-            "flex flex-col-reverse gap-3 mb-3 transition-all duration-200",
-            fabOpen
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4 pointer-events-none"
-          )}
-        >
-          {fabActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={action.href}
-                onClick={() => {
-                  setFabOpen(false);
-                  router.push(action.href);
-                }}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-full shadow-lg transition-all duration-200",
-                  action.color,
-                  fabOpen
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-8 opacity-0"
-                )}
-                style={{
-                  transitionDelay: fabOpen ? `${index * 50}ms` : "0ms",
-                }}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {action.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* FAB Button */}
-        <Button
-          onClick={() => setFabOpen(!fabOpen)}
-          className={cn(
-            "h-14 w-14 rounded-full shadow-lg transition-all duration-200",
-            fabOpen
-              ? "bg-red-500 hover:bg-red-600 rotate-45"
-              : "bg-green-600 hover:bg-green-700"
-          )}
-          size="icon"
-        >
-          <Plus className="h-6 w-6" />
-          <span className="sr-only">Quick actions</span>
-        </Button>
-      </div>
-
-      {/* FAB Backdrop */}
-      {fabOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
-          onClick={() => setFabOpen(false)}
-        />
-      )}
     </div>
   );
 }

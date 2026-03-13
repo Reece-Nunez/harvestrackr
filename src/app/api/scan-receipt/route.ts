@@ -3,7 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { EXPENSE_CATEGORIES, type ExpenseCategory } from "@/schemas/expense";
 
-const VALID_MEDIA_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const VALID_MEDIA_TYPES = [...VALID_IMAGE_TYPES, "application/pdf"];
 const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8MB
 
 // Category keywords for AI prompt context
@@ -105,11 +106,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate base64 data URL
-    const matches = image.match(/^data:(image\/\w+);base64,(.+)$/);
+    // Validate base64 data URL (images or PDF)
+    const matches = image.match(/^data:([\w/+-]+);base64,(.+)$/);
     if (!matches) {
       return NextResponse.json(
-        { error: "Invalid image format. Expected a base64 data URL." },
+        { error: "Invalid file format. Expected a base64 data URL." },
         { status: 400 }
       );
     }
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     if (!VALID_MEDIA_TYPES.includes(mediaType)) {
       return NextResponse.json(
-        { error: `Unsupported image type: ${mediaType}. Supported: ${VALID_MEDIA_TYPES.join(", ")}` },
+        { error: `Unsupported file type: ${mediaType}. Supported: ${VALID_MEDIA_TYPES.join(", ")}` },
         { status: 400 }
       );
     }
@@ -128,10 +129,30 @@ export async function POST(request: NextRequest) {
     const approximateSize = (base64Data.length * 3) / 4;
     if (approximateSize > MAX_IMAGE_SIZE_BYTES) {
       return NextResponse.json(
-        { error: `Image too large (${Math.round(approximateSize / 1024 / 1024)}MB). Maximum is 8MB.` },
+        { error: `File too large (${Math.round(approximateSize / 1024 / 1024)}MB). Maximum is 8MB.` },
         { status: 400 }
       );
     }
+
+    // Build the content block — PDF uses "document" type, images use "image" type
+    const isPdf = mediaType === "application/pdf";
+    const fileContentBlock: Anthropic.Messages.ContentBlockParam = isPdf
+      ? {
+          type: "document",
+          source: {
+            type: "base64",
+            media_type: "application/pdf",
+            data: base64Data,
+          },
+        }
+      : {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+            data: base64Data,
+          },
+        };
 
     // Call Claude API
     const client = new Anthropic({ apiKey });
@@ -143,14 +164,7 @@ export async function POST(request: NextRequest) {
         {
           role: "user",
           content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                data: base64Data,
-              },
-            },
+            fileContentBlock,
             {
               type: "text",
               text: RECEIPT_PROMPT,

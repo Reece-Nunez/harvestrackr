@@ -14,6 +14,7 @@ import {
   Plus,
   Trash2,
   DollarSign,
+  FileText,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -95,8 +96,8 @@ export default function ScanReceiptPage() {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      toast.error("Please select an image or PDF file");
       return;
     }
 
@@ -111,12 +112,16 @@ export default function ScanReceiptPage() {
     setParsedData(null);
     setIsEditing(false);
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Create preview (images only — PDFs can't be previewed as img src)
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
 
     // Process the image
     await processImage(file);
@@ -344,7 +349,7 @@ export default function ScanReceiptPage() {
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Supported formats: JPEG, PNG, WebP. Max size: 10MB
+                Supported formats: JPEG, PNG, WebP, PDF. Max size: 10MB
               </p>
 
               {/* Service status banner */}
@@ -384,7 +389,7 @@ export default function ScanReceiptPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,.pdf,application/pdf"
               className="hidden"
               onChange={handleFileSelect}
             />
@@ -439,13 +444,26 @@ export default function ScanReceiptPage() {
         <>
           {/* Image Preview & Confidence */}
           <div className="flex gap-6">
-            {imagePreview && (
+            {imagePreview ? (
               <div className="relative shrink-0">
                 <img
                   src={imagePreview}
                   alt="Receipt"
                   className="h-48 w-36 rounded-lg object-cover border"
                 />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute -right-2 -top-2 h-6 w-6"
+                  onClick={handleReset}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : imageFile && (
+              <div className="relative shrink-0 flex h-48 w-36 flex-col items-center justify-center gap-2 rounded-lg border bg-muted/50">
+                <FileText className="h-10 w-10 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground font-medium">PDF Receipt</span>
                 <Button
                   variant="secondary"
                   size="icon"
