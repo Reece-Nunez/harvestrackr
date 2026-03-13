@@ -152,12 +152,12 @@ export interface TeamInvitationWithInviter {
   email: string;
   role: TeamRole;
   status: InvitationStatus;
-  invited_by_user_id: string;
-  invited_by_name: string | null;
-  message: string | null;
+  invited_by: string;
+  invited_by_user_id?: string;
+  invited_by_name?: string | null;
+  message?: string | null;
   expires_at: string;
   accepted_at: string | null;
-  rejected_at: string | null;
   created_at: string;
 }
 

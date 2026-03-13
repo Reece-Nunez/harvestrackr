@@ -187,8 +187,8 @@ export function MobileNav({ onSignOut }: MobileNavProps) {
         {/* Center + Button — raised above the navbar */}
         <Sheet open={quickActionsOpen} onOpenChange={setQuickActionsOpen}>
           <SheetTrigger asChild>
-            <button className="relative flex items-center justify-center">
-              <span className="absolute -top-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg border-4 border-background">
+            <button className="relative flex items-center justify-center" style={{ marginTop: "-28px" }}>
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg border-4 border-background">
                 <Plus className="h-7 w-7" />
               </span>
             </button>

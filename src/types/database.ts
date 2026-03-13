@@ -322,27 +322,30 @@ export interface Database {
           email: string;
           role: TeamRole;
           status: InvitationStatus;
-          invited_by_user_id: string;
-          invited_by_name: string | null;
-          message: string | null;
+          invited_by: string;
+          invited_by_user_id?: string;
+          invited_by_name?: string | null;
+          token?: string;
+          message?: string | null;
           expires_at: string;
           accepted_at: string | null;
-          rejected_at: string | null;
           created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           farm_id: string;
           email: string;
-          role: TeamRole;
+          role?: TeamRole;
           status?: InvitationStatus;
-          invited_by_user_id: string;
+          invited_by: string;
+          invited_by_user_id?: string;
           invited_by_name?: string | null;
           message?: string | null;
-          expires_at: string;
+          expires_at?: string;
           accepted_at?: string | null;
-          rejected_at?: string | null;
           created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -350,13 +353,14 @@ export interface Database {
           email?: string;
           role?: TeamRole;
           status?: InvitationStatus;
+          invited_by?: string;
           invited_by_user_id?: string;
           invited_by_name?: string | null;
           message?: string | null;
           expires_at?: string;
           accepted_at?: string | null;
-          rejected_at?: string | null;
           created_at?: string;
+          updated_at?: string;
         };
         Relationships: [
           {
@@ -367,10 +371,10 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "team_invitations_invited_by_user_id_fkey";
-            columns: ["invited_by_user_id"];
+            foreignKeyName: "team_invitations_invited_by_fkey";
+            columns: ["invited_by"];
             isOneToOne: false;
-            referencedRelation: "users";
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           }
         ];

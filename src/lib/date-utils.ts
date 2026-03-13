@@ -1,6 +1,6 @@
-import { startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, format } from "date-fns";
+import { startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, subYears, format } from "date-fns";
 
-export type DateRangePreset = "this_month" | "last_month" | "this_quarter" | "this_year" | "custom";
+export type DateRangePreset = "this_month" | "last_month" | "this_quarter" | "this_year" | "last_year" | "custom";
 
 export interface DateRange {
   startDate: string;
@@ -32,6 +32,13 @@ export function getDateRangeFromPreset(preset: DateRangePreset, customStart?: st
         startDate: format(startOfYear(now), "yyyy-MM-dd"),
         endDate: format(endOfYear(now), "yyyy-MM-dd"),
       };
+    case "last_year": {
+      const lastYear = subYears(now, 1);
+      return {
+        startDate: format(startOfYear(lastYear), "yyyy-MM-dd"),
+        endDate: format(endOfYear(lastYear), "yyyy-MM-dd"),
+      };
+    }
     case "custom":
       return {
         startDate: customStart || format(startOfMonth(now), "yyyy-MM-dd"),

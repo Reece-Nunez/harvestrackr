@@ -209,9 +209,7 @@ export async function inviteTeamMember(
         email: email.toLowerCase(),
         role: validatedData.data.role,
         status: "PENDING",
-        invited_by_user_id: user.id,
-        invited_by_name: inviterName,
-        message: validatedData.data.message || null,
+        invited_by: user.id,
         expires_at: expiresAt.toISOString(),
       })
       .select("id")
@@ -219,7 +217,7 @@ export async function inviteTeamMember(
 
     if (inviteError) {
       console.error("Error creating invitation:", inviteError);
-      return { success: false, error: "Failed to create invitation" };
+      return { success: false, error: `Failed to create invitation: ${inviteError.message}` };
     }
 
     // Send invitation email via Supabase auth magic link

@@ -155,6 +155,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
               <SelectItem value="last_month">Last Month</SelectItem>
               <SelectItem value="this_quarter">This Quarter</SelectItem>
               <SelectItem value="this_year">This Year</SelectItem>
+              <SelectItem value="last_year">Last Year</SelectItem>
               <SelectItem value="custom">Custom Range</SelectItem>
             </SelectContent>
           </Select>
