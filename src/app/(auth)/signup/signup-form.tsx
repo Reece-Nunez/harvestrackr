@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { signupSchema, type SignupFormData } from "@/schemas/auth";
+import { sendWelcomeEmailAction } from "@/actions/auth";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,11 +31,11 @@ import {
 
 export function SignupForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const redirectTo = searchParams.get("redirectTo");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -71,7 +72,6 @@ export function SignupForm() {
             last_name: data.lastName,
             full_name: `${data.firstName} ${data.lastName}`,
           },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`,
         },
       });
 
@@ -84,62 +84,18 @@ export function SignupForm() {
         return;
       }
 
-      setEmailSent(true);
-      toast.success("Account created! Please check your email to verify.");
+      // Send welcome email via Resend (non-blocking)
+      sendWelcomeEmailAction(data.email, data.firstName).catch(() => {});
+
+      toast.success("Account created! Welcome to HarvesTrackr.");
+      router.push(redirectTo || "/dashboard");
+      router.refresh();
     } catch (error) {
       toast.error("An unexpected error occurred. Please try again.");
       console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
     }
-  }
-
-  if (emailSent) {
-    return (
-      <Card>
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-success/10 p-3">
-              <CheckCircle2 className="h-8 w-8 text-success" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            Check your email
-          </CardTitle>
-          <CardDescription className="text-center">
-            We sent a verification link to{" "}
-            <span className="font-medium text-foreground">
-              {form.getValues("email")}
-            </span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground text-center">
-            Click the link in the email to verify your account and get started
-            with HarvesTrackr.
-          </p>
-          <p className="text-sm text-muted-foreground text-center">
-            Didn&apos;t receive the email? Check your spam folder or{" "}
-            <button
-              type="button"
-              className="font-medium text-primary hover:underline"
-              onClick={() => setEmailSent(false)}
-            >
-              try again
-            </button>
-            .
-          </p>
-        </CardContent>
-        <CardFooter className="justify-center">
-          <Link
-            href="/login"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Back to sign in
-          </Link>
-        </CardFooter>
-      </Card>
-    );
   }
 
   return (

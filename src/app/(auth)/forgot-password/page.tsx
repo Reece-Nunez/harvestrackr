@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/schemas/auth";
+import { sendPasswordResetAction } from "@/actions/auth";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,14 +42,10 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
+      const result = await sendPasswordResetAction(data.email);
 
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
-      });
-
-      if (error) {
-        toast.error(error.message);
+      if (!result.success) {
+        toast.error(result.error);
         return;
       }
 
