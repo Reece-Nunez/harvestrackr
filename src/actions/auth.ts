@@ -47,8 +47,13 @@ export async function sendPasswordResetAction(
 
     if (error) {
       console.error("[password-reset] generateLink error:", error);
-      // Don't reveal whether user exists
-      return { success: true };
+      if (error.code === "user_not_found") {
+        return {
+          success: false,
+          error: "No account found with that email address. Please check the email or create a new account.",
+        };
+      }
+      return { success: false, error: "Something went wrong. Please try again." };
     }
 
     const actionLink = data?.properties?.action_link;
@@ -68,7 +73,6 @@ export async function sendPasswordResetAction(
     return { success: true };
   } catch (error) {
     console.error("[password-reset] Unexpected error:", error);
-    // Don't reveal errors to prevent email enumeration
-    return { success: true };
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }
