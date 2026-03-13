@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import {
   teamInvitationFormSchema,
   updateTeamMemberRoleSchema,
@@ -185,6 +185,37 @@ export async function inviteTeamMember(
     if (inviteError) {
       console.error("Error creating invitation:", inviteError);
       return { success: false, error: `Failed to create invitation: ${inviteError.message}` };
+    }
+
+    // Send invitation email using admin client (requires service role key)
+    try {
+      const adminClient = createAdminClient();
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+      const { data: farmData } = await supabase
+        .from("farms")
+        .select("name")
+        .eq("id", farmId)
+        .single();
+
+      const { error: emailError } = await adminClient.auth.admin.inviteUserByEmail(
+        email.toLowerCase(),
+        {
+          redirectTo: `${appUrl}/team/accept?token=${invitationId}`,
+          data: {
+            invited_to_farm: farmData?.name || "a farm",
+            invited_by: user.email || "Farm Team",
+            role: validatedData.data.role,
+          },
+        }
+      );
+
+      if (emailError) {
+        console.warn("Could not send invitation email:", emailError.message);
+      }
+    } catch (emailErr) {
+      // Non-fatal: invitation is created, email just didn't send
+      console.warn("Email sending failed:", emailErr);
     }
 
     revalidatePath("/team");
