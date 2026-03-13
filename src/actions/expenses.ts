@@ -80,6 +80,7 @@ export async function createExpense(
       category: item.category,
       quantity: item.quantity,
       unit_cost: item.unitCost,
+      unit_price: item.unitCost,
       line_total: item.lineTotal,
     }));
 
@@ -179,6 +180,7 @@ export async function updateExpense(
       category: item.category,
       quantity: item.quantity,
       unit_cost: item.unitCost,
+      unit_price: item.unitCost,
       line_total: item.lineTotal,
     }));
 
