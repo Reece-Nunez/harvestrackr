@@ -277,7 +277,7 @@ export default function ScanReceiptPage() {
       const dd = String(date.getDate()).padStart(2, "0");
 
       // Create expense
-      const result = await createExpense({
+      const expenseData = {
         farmId: currentFarm.id,
         date: `${yyyy}-${mm}-${dd}`,
         vendor: vendor.trim(),
@@ -290,12 +290,17 @@ export default function ScanReceiptPage() {
           unitCost: item.unitPrice,
           lineTotal: Math.round(item.total * 100) / 100,
         })),
-      });
+      };
+
+      console.log("Creating expense with data:", JSON.stringify(expenseData, null, 2));
+
+      const result = await createExpense(expenseData);
 
       if (result.success) {
         toast.success("Expense created successfully");
         router.push("/expenses");
       } else {
+        console.error("Create expense failed:", result.error);
         toast.error(result.error);
       }
     } catch (err) {

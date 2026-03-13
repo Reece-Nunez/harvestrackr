@@ -34,9 +34,13 @@ export async function createExpense(
     // Validate input
     const validatedData = createExpenseSchema.safeParse(data);
     if (!validatedData.success) {
+      const issues = validatedData.error.issues
+        .map((i) => `${i.path.join(".")}: ${i.message}`)
+        .join("; ");
+      console.error("Expense validation failed:", issues);
       return {
         success: false,
-        error: validatedData.error.issues[0]?.message || "Invalid data",
+        error: `Validation failed: ${issues}`,
       };
     }
 
@@ -60,7 +64,7 @@ export async function createExpense(
 
     if (expenseError) {
       console.error("Error creating expense:", expenseError);
-      return { success: false, error: "Failed to create expense" };
+      return { success: false, error: `Failed to create expense: ${expenseError.message}` };
     }
 
     // Create line items
@@ -81,7 +85,7 @@ export async function createExpense(
       console.error("Error creating line items:", lineItemsError);
       // Clean up the expense if line items failed
       await supabase.from("expenses").delete().eq("id", expense.id);
-      return { success: false, error: "Failed to create line items" };
+      return { success: false, error: `Failed to create line items: ${lineItemsError.message}` };
     }
 
     revalidatePath("/expenses");
