@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { sendInviteEmail } from "@/lib/email";
 import {
   teamInvitationFormSchema,
   updateTeamMemberRoleSchema,
@@ -191,37 +192,47 @@ export async function inviteTeamMember(
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const inviteUrl = `${appUrl}/invite/${invitationId}`;
 
-    // Send invitation email using admin client (requires service role key)
+    // Get farm name for email
+    const { data: farmData } = await supabase
+      .from("farms")
+      .select("name")
+      .eq("id", farmId)
+      .single();
+
+    const farmName = farmData?.name || "a farm";
+    const inviterName = user.email || "A team member";
+    const roleName = validatedData.data.role.charAt(0) + validatedData.data.role.slice(1).toLowerCase();
+
+    // Send invitation email
     let emailSent = false;
     try {
       const adminClient = createAdminClient();
-
-      const { data: farmData } = await supabase
-        .from("farms")
-        .select("name")
-        .eq("id", farmId)
-        .single();
-
       const inviteRedirect = `${appUrl}/api/auth/callback?next=/invite/${invitationId}`;
 
-      // inviteUserByEmail works for new users — creates account + sends email
+      // Try inviteUserByEmail first (creates account + sends email for new users)
       const { error: emailError } = await adminClient.auth.admin.inviteUserByEmail(
         email.toLowerCase(),
         {
           redirectTo: inviteRedirect,
           data: {
-            invited_to_farm: farmData?.name || "a farm",
-            invited_by: user.email || "Farm Team",
-            role: validatedData.data.role,
+            invited_to_farm: farmName,
+            invited_by: inviterName,
+            role: roleName,
           },
         }
       );
 
       if (emailError) {
         if (emailError.message.includes("already been registered")) {
-          // User already exists — can't send Supabase auth email
-          // Invite URL will be returned for manual sharing
-          console.info("Invited user already has an account, invite link returned for sharing");
+          // User already exists — send invite email via Resend
+          await sendInviteEmail({
+            to: email.toLowerCase(),
+            inviteUrl,
+            farmName,
+            inviterName,
+            role: roleName,
+          });
+          emailSent = true;
         } else {
           console.warn("Could not send invitation email:", emailError.message);
         }
@@ -482,7 +493,7 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
     // Get invitation info
     const { data: invitation, error: inviteError } = await supabase
       .from("team_invitations")
-      .select("farm_id, status, email")
+      .select("farm_id, status, email, role")
       .eq("id", invitationId)
       .single();
 
@@ -532,6 +543,16 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
     const inviteUrl = `${appUrl}/invite/${invitationId}`;
     let emailSent = false;
 
+    // Get farm name for email
+    const { data: farmData } = await adminClient
+      .from("farms")
+      .select("name")
+      .eq("id", invitation.farm_id)
+      .single();
+
+    const farmName = farmData?.name || "a farm";
+    const inviterName = user.email || "A team member";
+
     try {
       const inviteRedirect = `${appUrl}/api/auth/callback?next=/invite/${invitationId}`;
 
@@ -544,7 +565,15 @@ export async function resendInvitation(invitationId: string): Promise<ActionResu
 
       if (emailError) {
         if (emailError.message.includes("already been registered")) {
-          console.info("Invited user already has an account, invite link returned for sharing");
+          // User already exists — send invite email via Resend
+          await sendInviteEmail({
+            to: invitation.email,
+            inviteUrl,
+            farmName,
+            inviterName,
+            role: invitation.role || "Member",
+          });
+          emailSent = true;
         } else {
           console.warn("Could not resend invitation email:", emailError.message);
         }
@@ -671,11 +700,12 @@ export async function getInvitationDetails(
 
     const { data: invitation, error } = await adminClient
       .from("team_invitations")
-      .select("id, email, role, status, expires_at, farm_id, invited_by, invited_by_name")
+      .select("id, email, role, status, expires_at, farm_id, invited_by")
       .eq("id", token)
       .single();
 
     if (error || !invitation) {
+      console.error("getInvitationDetails failed:", { token, error: error?.message, code: error?.code });
       return { success: false, error: "Invitation not found" };
     }
 
