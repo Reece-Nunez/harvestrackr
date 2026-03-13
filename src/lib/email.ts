@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = "HarvesTrackr <noreply@send.harvestrackr.com>";
+const FROM_EMAIL = "HarvesTrackr <noreply@harvestrackr.com>";
 
 function emailLayout(content: string) {
   return `<!DOCTYPE html>
