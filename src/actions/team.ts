@@ -165,63 +165,30 @@ export async function inviteTeamMember(
       return { success: false, error: "An invitation has already been sent to this email" };
     }
 
-    // Create invitation
+    // Create invitation with pre-generated ID
+    const invitationId = crypto.randomUUID();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Expires in 7 days
 
-    const { data: invitation, error: inviteError } = await supabase
+    const { error: inviteError } = await supabase
       .from("team_invitations")
       .insert({
+        id: invitationId,
         farm_id: farmId,
         email: email.toLowerCase(),
         role: validatedData.data.role,
         status: "PENDING",
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
-      })
-      .select("id")
-      .single();
+      });
 
     if (inviteError) {
       console.error("Error creating invitation:", inviteError);
       return { success: false, error: `Failed to create invitation: ${inviteError.message}` };
     }
 
-    // Send invitation email via Supabase auth magic link
-    // The invited user will get an email to sign up / sign in
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const { data: farmData } = await supabase
-      .from("farms")
-      .select("name")
-      .eq("id", farmId)
-      .single();
-
-    const farmName = farmData?.name || "a farm";
-
-    try {
-      // Use Supabase's built-in email to invite or notify the user
-      const { error: emailError } = await supabase.auth.admin.inviteUserByEmail(
-        email.toLowerCase(),
-        {
-          redirectTo: `${appUrl}/team/accept?token=${invitation.id}`,
-          data: {
-            invited_to_farm: farmName,
-            invited_by: user.email || "Farm Team",
-            role: validatedData.data.role,
-          },
-        }
-      );
-
-      if (emailError) {
-        // Non-fatal: invitation is created, email just didn't send
-        console.warn("Could not send invitation email:", emailError.message);
-      }
-    } catch (emailErr) {
-      console.warn("Email sending failed:", emailErr);
-    }
-
     revalidatePath("/team");
-    return { success: true, data: { id: invitation.id } };
+    return { success: true, data: { id: invitationId } };
   } catch (error) {
     console.error("Error in inviteTeamMember:", error);
     return { success: false, error: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}` };
