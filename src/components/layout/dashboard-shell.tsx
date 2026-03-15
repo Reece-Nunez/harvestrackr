@@ -183,13 +183,14 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0" hideClose>
-              <SheetHeader className="sr-only">
+            <SheetContent side="left" className="w-72 p-0 border-r-0" hideClose aria-describedby={undefined}>
+              <div className="sr-only">
                 <SheetTitle>Navigation Menu</SheetTitle>
-              </SheetHeader>
+              </div>
               <Sidebar
                 isCollapsed={false}
                 onNavigate={() => setMobileMenuOpen(false)}
+                hideBorder
               />
             </SheetContent>
           </Sheet>

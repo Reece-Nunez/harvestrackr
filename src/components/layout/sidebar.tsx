@@ -137,6 +137,7 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggle?: () => void;
   onNavigate?: () => void;
+  hideBorder?: boolean;
 }
 
 function NavItemLink({
@@ -285,7 +286,7 @@ function CollapsibleNavGroup({
   );
 }
 
-export function Sidebar({ isCollapsed, onNavigate }: SidebarProps) {
+export function Sidebar({ isCollapsed, onNavigate, hideBorder }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { farms, currentFarm, setCurrentFarm, user } = useFarm();
@@ -313,7 +314,8 @@ export function Sidebar({ isCollapsed, onNavigate }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r bg-card transition-all duration-300",
+        "flex h-full flex-col bg-card transition-all duration-300",
+        !hideBorder && "border-r",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
