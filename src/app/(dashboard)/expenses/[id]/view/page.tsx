@@ -76,21 +76,21 @@ export default async function ExpenseDetailPage({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/expenses">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Expense Details</h1>
-            <p className="text-muted-foreground">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">Expense Details</h1>
+            <p className="text-sm text-muted-foreground truncate">
               {expense.vendor || "Unknown Vendor"} - {formatDate(expense.date)}
             </p>
           </div>
         </div>
-        <Button asChild>
+        <Button asChild className="self-start sm:self-auto">
           <Link href={`/expenses/${id}`}>
             <Pencil className="h-4 w-4 mr-2" />
             Edit
@@ -161,8 +161,8 @@ export default async function ExpenseDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <table className="w-full text-sm">
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="border-b bg-muted/50">
                       <th className="px-4 py-3 text-left font-medium">Item</th>
