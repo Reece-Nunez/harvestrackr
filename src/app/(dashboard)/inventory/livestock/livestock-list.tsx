@@ -316,9 +316,9 @@ export function LivestockList({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3">
         <div className="flex gap-2 flex-1">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by name or tag..."
@@ -332,9 +332,9 @@ export function LivestockList({
             Search
           </Button>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
           <Select value={selectedSpecies} onValueChange={handleSpeciesChange}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full sm:w-[130px]">
               <SelectValue placeholder="Species" />
             </SelectTrigger>
             <SelectContent>
@@ -347,7 +347,7 @@ export function LivestockList({
             </SelectContent>
           </Select>
           <Select value={selectedStatus} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full sm:w-[130px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -360,7 +360,7 @@ export function LivestockList({
             </SelectContent>
           </Select>
           <Select value={selectedField} onValueChange={handleFieldChange}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full sm:w-[130px]">
               <SelectValue placeholder="Field" />
             </SelectTrigger>
             <SelectContent>
@@ -381,8 +381,8 @@ export function LivestockList({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <table className="w-full caption-bottom text-sm">
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full caption-bottom text-sm min-w-[700px]">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -447,11 +447,11 @@ export function LivestockList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-muted-foreground text-center sm:text-left">
             Page {page} of {totalPages}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <Button
               variant="outline"
               size="sm"

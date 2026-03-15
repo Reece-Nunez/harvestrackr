@@ -113,7 +113,7 @@ export default async function IncomePage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Income</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Income</h1>
           <p className="text-muted-foreground">
             Track and manage your farm income records
           </p>

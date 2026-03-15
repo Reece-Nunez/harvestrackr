@@ -514,7 +514,7 @@ export function InvoicesList({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
@@ -562,9 +562,9 @@ export function InvoicesList({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+      <div className="flex flex-col gap-3">
         <div className="flex flex-1 gap-2">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search invoices..."
@@ -579,38 +579,40 @@ export function InvoicesList({
           </Button>
         </div>
 
-        <Select value={status || "all"} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {INVOICE_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={status || "all"} onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              {INVOICE_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <DateRangePicker
-          dateRange={dateRange}
-          onDateRangeChange={handleDateRangeChange}
-          placeholder="Filter by date"
-          className="w-[280px]"
-        />
+          <DateRangePicker
+            dateRange={dateRange}
+            onDateRangeChange={handleDateRangeChange}
+            placeholder="Filter by date"
+            className="w-full sm:w-[280px]"
+          />
 
-        {hasFilters && (
-          <Button variant="ghost" onClick={clearFilters}>
-            <X className="h-4 w-4 mr-2" />
-            Clear
-          </Button>
-        )}
+          {hasFilters && (
+            <Button variant="ghost" onClick={clearFilters} className="w-full sm:w-auto">
+              <X className="h-4 w-4 mr-2" />
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <table className="w-full caption-bottom text-sm">
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full caption-bottom text-sm min-w-[700px]">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -681,12 +683,12 @@ export function InvoicesList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, total)} of{" "}
             {total} invoices
           </p>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <Button
               variant="outline"
               size="sm"

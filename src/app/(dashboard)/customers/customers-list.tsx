@@ -356,7 +356,7 @@ export function CustomersList({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
@@ -417,8 +417,8 @@ export function CustomersList({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <table className="w-full caption-bottom text-sm">
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full caption-bottom text-sm min-w-[600px]">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -489,12 +489,12 @@ export function CustomersList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, total)} of{" "}
             {total} customers
           </p>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <Button
               variant="outline"
               size="sm"

@@ -343,7 +343,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium truncate max-w-[150px]">
+                        <p className="font-medium truncate max-w-[120px] sm:max-w-[200px]">
                           {transaction.description}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -439,7 +439,7 @@ function KPICard({
           </div>
         </div>
         <div className="mt-3">
-          <p className="text-2xl font-bold">{formatCurrency(value)}</p>
+          <p className="text-xl sm:text-2xl font-bold truncate">{formatCurrency(value)}</p>
           <div className="flex items-center gap-2 mt-1">
             {change !== undefined && (
               <span className={`text-sm flex items-center ${getTrendColor(change)}`}>

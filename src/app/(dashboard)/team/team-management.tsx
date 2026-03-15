@@ -420,24 +420,24 @@ export function TeamManagement({
               {invitations.map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border p-4"
                 >
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarFallback>
                         {invitation.email[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-medium">{invitation.email}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{invitation.email}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                         <Badge variant="outline">
                           {invitation.role.charAt(0) +
                             invitation.role.slice(1).toLowerCase()}
                         </Badge>
-                        <span>-</span>
-                        <Clock className="h-3 w-3" />
-                        <span>
+                        <span className="hidden sm:inline">-</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
                           Expires{" "}
                           {formatDistanceToNow(new Date(invitation.expires_at), {
                             addSuffix: true,
@@ -446,7 +446,7 @@ export function TeamManagement({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 shrink-0">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -457,8 +457,8 @@ export function TeamManagement({
                         toast.success("Invite link copied to clipboard");
                       }}
                     >
-                      <LinkIcon className="h-4 w-4 mr-1" />
-                      Copy Link
+                      <LinkIcon className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Copy Link</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -466,8 +466,8 @@ export function TeamManagement({
                       onClick={() => handleResendInvitation(invitation.id)}
                       disabled={isLoading}
                     >
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                      Resend
+                      <RefreshCw className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Resend</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -476,8 +476,8 @@ export function TeamManagement({
                       onClick={() => handleCancelInvitation(invitation.id)}
                       disabled={isLoading}
                     >
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel
+                      <X className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Cancel</span>
                     </Button>
                   </div>
                 </div>

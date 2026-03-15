@@ -374,7 +374,7 @@ export function ReportsGenerator({ farmId, farmName }: ReportsGeneratorProps) {
       <div className="lg:col-span-2">
         <Card className="h-full">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
@@ -477,7 +477,7 @@ function ReportPreview({ data }: { data: ReportData }) {
 
       {/* Sections */}
       <Tabs defaultValue={data.sections[0]?.title} className="w-full">
-        <TabsList className="w-full justify-start overflow-x-auto">
+        <TabsList className="w-full justify-start overflow-x-auto no-scrollbar">
           {data.sections.map((section) => (
             <TabsTrigger key={section.title} value={section.title} className="text-sm">
               {section.title}
@@ -493,7 +493,7 @@ function ReportPreview({ data }: { data: ReportData }) {
               </div>
             ) : section.type === "table" && section.columns ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="border-b">
                       {section.columns.map((col) => (

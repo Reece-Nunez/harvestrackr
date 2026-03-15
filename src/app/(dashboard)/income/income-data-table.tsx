@@ -256,7 +256,7 @@ export function IncomeDataTable({ data, farmId }: IncomeDataTableProps) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:flex-wrap">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap md:items-end">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium">Date Range</label>
           <DateRangePicker
@@ -265,14 +265,14 @@ export function IncomeDataTable({ data, farmId }: IncomeDataTableProps) {
               setDateRange({ from: range?.from, to: range?.to })
             }
             placeholder="Filter by date"
-            className="w-[280px]"
+            className="w-full md:w-[280px]"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium">Item Type</label>
           <Select value={itemFilter} onValueChange={setItemFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full md:w-[150px]">
               <SelectValue placeholder="All items" />
             </SelectTrigger>
             <SelectContent>
@@ -289,7 +289,7 @@ export function IncomeDataTable({ data, farmId }: IncomeDataTableProps) {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium">Payment Method</label>
           <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full md:w-[150px]">
               <SelectValue placeholder="All methods" />
             </SelectTrigger>
             <SelectContent>

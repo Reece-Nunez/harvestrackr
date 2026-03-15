@@ -101,8 +101,8 @@ function DataTable<TData, TValue>({
         searchPlaceholder={searchPlaceholder}
         showColumnToggle={showColumnToggle}
       />
-      <div className="rounded-md border">
-        <table className="w-full caption-bottom text-sm">
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full caption-bottom text-sm min-w-[600px]">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -189,7 +189,7 @@ function DataTableToolbar<TData>({
             onChange={(event) =>
               table.getColumn(searchKey)?.setFilterValue(event.target.value)
             }
-            className="h-8 w-[150px] lg:w-[250px]"
+            className="h-8 w-full sm:w-[150px] lg:w-[250px]"
           />
         )}
       </div>

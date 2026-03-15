@@ -448,9 +448,9 @@ export default function ScanReceiptPage() {
       {processingState === "complete" && parsedData && (
         <>
           {/* Image Preview & Confidence */}
-          <div className="flex gap-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
             {imagePreview ? (
-              <div className="relative shrink-0">
+              <div className="relative shrink-0 self-center sm:self-start">
                 <img
                   src={imagePreview}
                   alt="Receipt"
@@ -466,7 +466,7 @@ export default function ScanReceiptPage() {
                 </Button>
               </div>
             ) : imageFile && (
-              <div className="relative shrink-0 flex h-48 w-36 flex-col items-center justify-center gap-2 rounded-lg border bg-muted/50">
+              <div className="relative shrink-0 self-center sm:self-start flex h-48 w-36 flex-col items-center justify-center gap-2 rounded-lg border bg-muted/50">
                 <FileText className="h-10 w-10 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground font-medium">PDF Receipt</span>
                 <Button
@@ -480,14 +480,14 @@ export default function ScanReceiptPage() {
               </div>
             )}
             <div className="flex-1 space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold">Extracted Data</h2>
                   <p className="text-sm text-muted-foreground">
                     Review and edit the extracted information
                   </p>
                 </div>
-                <Badge className={cn(confidenceColor[parsedData.confidence])}>
+                <Badge className={cn("self-start", confidenceColor[parsedData.confidence])}>
                   {parsedData.confidence === "high" && (
                     <CheckCircle className="h-3 w-3 mr-1" />
                   )}
