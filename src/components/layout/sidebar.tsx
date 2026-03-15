@@ -136,16 +136,19 @@ const navGroups: NavGroup[] = [
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle?: () => void;
+  onNavigate?: () => void;
 }
 
 function NavItemLink({
   item,
   isCollapsed,
   isActive,
+  onNavigate,
 }: {
   item: NavItem;
   isCollapsed: boolean;
   isActive: boolean;
+  onNavigate?: () => void;
 }) {
   const Icon = item.icon;
 
@@ -156,6 +159,7 @@ function NavItemLink({
           <TooltipTrigger asChild>
             <Link
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground",
                 isActive && "bg-accent text-accent-foreground"
@@ -176,6 +180,7 @@ function NavItemLink({
   return (
     <Link
       href={item.href}
+      onClick={onNavigate}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
         isActive && "bg-accent text-accent-foreground font-medium"
@@ -191,10 +196,12 @@ function CollapsibleNavGroup({
   group,
   isCollapsed,
   pathname,
+  onNavigate,
 }: {
   group: NavGroup;
   isCollapsed: boolean;
   pathname: string;
+  onNavigate?: () => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(() =>
     group.items.some((item) => pathname.startsWith(item.href) && item.href !== "/")
@@ -230,7 +237,7 @@ function CollapsibleNavGroup({
           <DropdownMenuSeparator />
           {group.items.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href} className="flex items-center gap-2">
+              <Link href={item.href} onClick={onNavigate} className="flex items-center gap-2">
                 <item.icon className="h-4 w-4" />
                 {item.title}
               </Link>
@@ -269,6 +276,7 @@ function CollapsibleNavGroup({
               item={item}
               isCollapsed={false}
               isActive={pathname === item.href}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
@@ -277,7 +285,7 @@ function CollapsibleNavGroup({
   );
 }
 
-export function Sidebar({ isCollapsed }: SidebarProps) {
+export function Sidebar({ isCollapsed, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { farms, currentFarm, setCurrentFarm, user } = useFarm();
@@ -393,7 +401,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href="/profile" className="block">
+                <Link href="/profile" onClick={onNavigate} className="block">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={user?.avatar_url || undefined} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
@@ -406,6 +414,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         ) : (
           <Link
             href="/profile"
+            onClick={onNavigate}
             className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
           >
             <Avatar className="h-10 w-10">
@@ -439,6 +448,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               item={item}
               isCollapsed={isCollapsed}
               isActive={pathname === item.href}
+              onNavigate={onNavigate}
             />
           ))}
 
@@ -451,6 +461,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               group={group}
               isCollapsed={isCollapsed}
               pathname={pathname}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
