@@ -610,9 +610,56 @@ export function InvoicesList({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border overflow-x-auto">
-        <table className="w-full caption-bottom text-sm min-w-[700px]">
+      {/* Mobile: Card Layout */}
+      <div className="space-y-3 sm:hidden">
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : invoices.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <FileText className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">No invoices found</p>
+            {hasFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">Clear filters</Button>
+            )}
+          </div>
+        ) : (
+          invoices.map((invoice) => {
+            const overdue = isInvoiceOverdue(invoice);
+            return (
+              <Link
+                key={invoice.id}
+                href={`/invoices/${invoice.id}`}
+                className="block rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium">{invoice.invoice_number}</p>
+                    <p className="text-sm text-muted-foreground truncate">{invoice.customer.name}</p>
+                  </div>
+                  <span className="text-base font-semibold shrink-0">
+                    {formatCurrency(invoice.total)}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Badge variant={getInvoiceStatusVariant(invoice.status)}>
+                    {invoice.status}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">{formatDate(invoice.date)}</span>
+                  {invoice.due_date && (
+                    <span className={cn("text-sm", overdue && "text-destructive font-medium")}>
+                      Due: {formatDate(invoice.due_date)}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden sm:block rounded-md border">
+        <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr

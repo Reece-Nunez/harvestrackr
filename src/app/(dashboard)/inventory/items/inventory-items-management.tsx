@@ -162,7 +162,7 @@ export function InventoryItemsManagement({
   return (
     <>
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -209,14 +209,13 @@ export function InventoryItemsManagement({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Item
-        </Button>
-
-        <div className="flex gap-2 flex-1">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3">
+        <div className="flex gap-2">
+          <Button onClick={() => setShowForm(true)} className="shrink-0">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search items..."
@@ -226,14 +225,14 @@ export function InventoryItemsManagement({
               className="pl-9"
             />
           </div>
-          <Button variant="secondary" onClick={handleSearch}>
+          <Button variant="secondary" onClick={handleSearch} className="shrink-0">
             Search
           </Button>
         </div>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-3 items-center">
           <Select value={selectedType} onValueChange={handleTypeChange}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full sm:w-[130px]">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -279,132 +278,189 @@ export function InventoryItemsManagement({
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-md border">
-          <table className="w-full caption-bottom text-sm">
-            <thead className="[&_tr]:border-b">
-              <tr className="border-b transition-colors hover:bg-muted/50">
-                <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Name
-                </th>
-                <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Type
-                </th>
-                <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Quantity
-                </th>
-                <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">
-                  Location
-                </th>
-                <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden lg:table-cell">
-                  Expiry
-                </th>
-                <th className="h-10 px-4 text-right align-middle font-medium text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:last-child]:border-0">
-              {items.map((item) => {
-                const expiryStatus = getExpiryStatus(item.expiry_date);
-                const isLowStock = item.quantity <= 5;
-
-                return (
-                  <tr
-                    key={item.id}
-                    className="border-b transition-colors hover:bg-muted/50"
-                  >
-                    <td className="p-4 align-middle">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        {item.notes && (
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                            {item.notes}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <Badge
-                        variant="secondary"
-                        className={typeColors[item.type] || ""}
-                      >
-                        {item.type.charAt(0) + item.type.slice(1).toLowerCase()}
-                      </Badge>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={
-                            isLowStock
-                              ? "font-bold text-yellow-600"
-                              : "font-medium"
-                          }
-                        >
-                          {item.quantity}
-                        </span>
-                        {item.unit && (
-                          <span className="text-muted-foreground text-sm">
-                            {item.unit}
-                          </span>
-                        )}
-                        {isLowStock && (
-                          <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle hidden md:table-cell">
-                      {item.location ? (
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          {item.location}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
+        <>
+          {/* Mobile: Card Layout */}
+          <div className="space-y-3 sm:hidden">
+            {items.map((item) => {
+              const expiryStatus = getExpiryStatus(item.expiry_date);
+              const isLowStock = item.quantity <= 5;
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-lg border p-4 space-y-2 hover:bg-muted/50 transition-colors"
+                  onClick={() => handleEditItem(item)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium">{item.name}</p>
+                      {item.notes && (
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {item.notes}
+                        </p>
                       )}
-                    </td>
-                    <td className="p-4 align-middle hidden lg:table-cell">
-                      {item.expiry_date ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {format(parseISO(item.expiry_date), "MMM d, yyyy")}
-                          </span>
-                          {expiryStatus && (
-                            <Badge
-                              variant="secondary"
-                              className={expiryStatus.color}
-                            >
-                              {expiryStatus.label}
-                            </Badge>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={`shrink-0 ${typeColors[item.type] || ""}`}
+                    >
+                      {item.type.charAt(0) + item.type.slice(1).toLowerCase()}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <span className={`flex items-center gap-1 ${isLowStock ? "font-bold text-yellow-600" : "text-muted-foreground"}`}>
+                      Qty: {item.quantity}{item.unit ? ` ${item.unit}` : ""}
+                      {isLowStock && <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                    </span>
+                    {item.location && (
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {item.location}
+                      </span>
+                    )}
+                    {item.expiry_date && (
+                      <span className="text-muted-foreground">
+                        Exp: {format(parseISO(item.expiry_date), "MMM d, yyyy")}
+                      </span>
+                    )}
+                    {expiryStatus && (
+                      <Badge variant="secondary" className={expiryStatus.color}>
+                        {expiryStatus.label}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop: Table Layout */}
+          <div className="hidden sm:block rounded-md border">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="[&_tr]:border-b">
+                <tr className="border-b transition-colors hover:bg-muted/50">
+                  <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Name
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Type
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Quantity
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">
+                    Location
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden lg:table-cell">
+                    Expiry
+                  </th>
+                  <th className="h-10 px-4 text-right align-middle font-medium text-muted-foreground">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {items.map((item) => {
+                  const expiryStatus = getExpiryStatus(item.expiry_date);
+                  const isLowStock = item.quantity <= 5;
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="border-b transition-colors hover:bg-muted/50"
+                    >
+                      <td className="p-4 align-middle">
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          {item.notes && (
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {item.notes}
+                            </p>
                           )}
                         </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="p-4 align-middle text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditItem(item)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="p-4 align-middle">
+                        <Badge
+                          variant="secondary"
+                          className={typeColors[item.type] || ""}
+                        >
+                          {item.type.charAt(0) + item.type.slice(1).toLowerCase()}
+                        </Badge>
+                      </td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={
+                              isLowStock
+                                ? "font-bold text-yellow-600"
+                                : "font-medium"
+                            }
+                          >
+                            {item.quantity}
+                          </span>
+                          {item.unit && (
+                            <span className="text-muted-foreground text-sm">
+                              {item.unit}
+                            </span>
+                          )}
+                          {isLowStock && (
+                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle hidden md:table-cell">
+                        {item.location ? (
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            {item.location}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </td>
+                      <td className="p-4 align-middle hidden lg:table-cell">
+                        {item.expiry_date ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">
+                              {format(parseISO(item.expiry_date), "MMM d, yyyy")}
+                            </span>
+                            {expiryStatus && (
+                              <Badge
+                                variant="secondary"
+                                className={expiryStatus.color}
+                              >
+                                {expiryStatus.label}
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditItem(item)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-muted-foreground text-center sm:text-left">
             Page {page} of {totalPages}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <Button
               variant="outline"
               size="sm"

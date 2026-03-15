@@ -380,9 +380,43 @@ export function LivestockList({
         Showing {livestock.length} of {total} animals
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border overflow-x-auto">
-        <table className="w-full caption-bottom text-sm min-w-[700px]">
+      {/* Mobile: Card Layout */}
+      <div className="space-y-3 sm:hidden">
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : livestock.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">No livestock found.</div>
+        ) : (
+          livestock.map((animal) => (
+            <Link
+              key={animal.id}
+              href={`/inventory/livestock/${animal.id}`}
+              className="block rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium">{animal.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {animal.species}{animal.breed ? ` · ${animal.breed}` : ""}
+                  </p>
+                </div>
+                <Badge variant="secondary" className={`shrink-0 ${statusColors[animal.status] || ""}`}>
+                  {animal.status.charAt(0) + animal.status.slice(1).toLowerCase()}
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
+                {animal.tag_number && <span>Tag: {animal.tag_number}</span>}
+                {animal.field?.name && <span>{animal.field.name}</span>}
+                {animal.birth_date && <span>{formatDistanceToNow(parseISO(animal.birth_date))} old</span>}
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden sm:block rounded-md border">
+        <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr

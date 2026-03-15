@@ -416,9 +416,54 @@ export function CustomersList({
         )}
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border overflow-x-auto">
-        <table className="w-full caption-bottom text-sm min-w-[600px]">
+      {/* Mobile: Card Layout */}
+      <div className="space-y-3 sm:hidden">
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : customers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Users className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">No customers found</p>
+            {hasFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">Clear filters</Button>
+            )}
+          </div>
+        ) : (
+          customers.map((customer) => {
+            const location = [customer.city, customer.state].filter(Boolean).join(", ");
+            return (
+              <Link
+                key={customer.id}
+                href={`/customers/${customer.id}`}
+                className="block rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+              >
+                <p className="font-medium">{customer.name}</p>
+                <div className="flex flex-col gap-1 mt-1 text-sm text-muted-foreground">
+                  {customer.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" /> {customer.email}
+                    </span>
+                  )}
+                  {customer.phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" /> {customer.phone}
+                    </span>
+                  )}
+                  {location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {location}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden sm:block rounded-md border">
+        <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr

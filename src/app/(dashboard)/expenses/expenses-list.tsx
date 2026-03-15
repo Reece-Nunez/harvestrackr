@@ -424,9 +424,55 @@ export function ExpensesList({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border overflow-x-auto">
-        <table className="w-full caption-bottom text-sm min-w-[600px]">
+      {/* Mobile: Card Layout */}
+      <div className="space-y-3 sm:hidden">
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        ) : expenses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Receipt className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">No expenses found</p>
+            {hasFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">Clear filters</Button>
+            )}
+          </div>
+        ) : (
+          expenses.map((expense) => {
+            const categories = [...new Set(expense.expense_line_items.map((item) => item.category))];
+            return (
+              <Link
+                key={expense.id}
+                href={`/expenses/${expense.id}/view`}
+                className="block rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{expense.vendor || "Unknown Vendor"}</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(expense.date)}</p>
+                  </div>
+                  <span className="text-base font-semibold shrink-0">
+                    {formatCurrency(expense.grand_total)}
+                  </span>
+                </div>
+                {categories.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {categories.slice(0, 3).map((cat) => (
+                      <Badge key={cat} variant="secondary" className="text-xs">{cat}</Badge>
+                    ))}
+                    {categories.length > 3 && (
+                      <Badge variant="outline" className="text-xs">+{categories.length - 3}</Badge>
+                    )}
+                  </div>
+                )}
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: Table Layout */}
+      <div className="hidden sm:block rounded-md border">
+        <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
