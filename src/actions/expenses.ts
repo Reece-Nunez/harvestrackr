@@ -73,7 +73,6 @@ export async function createExpense(
     }
 
     // Create line items
-    // Note: line_total is GENERATED ALWAYS in the DB (quantity * unit_price) — do not insert it
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: expense.id,
       description: item.item,
@@ -82,6 +81,7 @@ export async function createExpense(
       quantity: item.quantity,
       unit_price: item.unitCost,
       unit_cost: item.unitCost,
+      line_total: item.lineTotal,
     }));
 
     const { error: lineItemsError } = await supabase
@@ -173,7 +173,6 @@ export async function updateExpense(
     }
 
     // Create new line items
-    // Note: line_total is GENERATED ALWAYS in the DB (quantity * unit_price) — do not insert it
     const lineItemsToInsert = lineItems.map((item) => ({
       expense_id: id,
       description: item.item,
@@ -182,6 +181,7 @@ export async function updateExpense(
       quantity: item.quantity,
       unit_price: item.unitCost,
       unit_cost: item.unitCost,
+      line_total: item.lineTotal,
     }));
 
     const { error: lineItemsError } = await supabase
