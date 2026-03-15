@@ -69,7 +69,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <DrawerPrimitive.Content
       ref={ref}
-      className={cn(sheetVariants({ side }), className)}
+      className={cn(sheetVariants({ side }), hideClose && "p-0 gap-0", className)}
       {...props}
     >
       {showHandle && (side === "bottom" || side === "top") && (
