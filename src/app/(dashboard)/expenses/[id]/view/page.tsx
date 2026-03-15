@@ -74,10 +74,10 @@ export default async function ExpenseDetailPage({
   const categories = [...new Set(lineItems.map((item: any) => item.category))];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/expenses">
               <ArrowLeft className="h-4 w-4" />
@@ -90,7 +90,7 @@ export default async function ExpenseDetailPage({
             </p>
           </div>
         </div>
-        <Button asChild className="self-start sm:self-auto">
+        <Button asChild className="self-start sm:self-auto ml-11 sm:ml-0">
           <Link href={`/expenses/${id}`}>
             <Pencil className="h-4 w-4 mr-2" />
             Edit
@@ -100,7 +100,7 @@ export default async function ExpenseDetailPage({
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Main Details */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-6 min-w-0">
           {/* Summary Card */}
           <Card>
             <CardHeader>
@@ -109,7 +109,7 @@ export default async function ExpenseDetailPage({
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <Calendar className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -118,12 +118,12 @@ export default async function ExpenseDetailPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <Store className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Vendor</p>
-                    <p className="font-medium">{expense.vendor || "—"}</p>
+                    <p className="font-medium truncate">{expense.vendor || "—"}</p>
                   </div>
                 </div>
               </div>
@@ -131,14 +131,14 @@ export default async function ExpenseDetailPage({
               {expense.description && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Description</p>
-                  <p>{expense.description}</p>
+                  <p className="break-words">{expense.description}</p>
                 </div>
               )}
 
               {expense.notes && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                  <p className="text-sm">{expense.notes}</p>
+                  <p className="text-sm break-words">{expense.notes}</p>
                 </div>
               )}
 
@@ -161,8 +161,33 @@ export default async function ExpenseDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border overflow-x-auto">
-                <table className="w-full text-sm min-w-[500px]">
+              {/* Mobile: stacked cards */}
+              <div className="space-y-3 sm:hidden">
+                {lineItems.map((item: any, index: number) => (
+                  <div
+                    key={item.id || index}
+                    className="rounded-lg border p-3 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium">{item.item}</p>
+                      <p className="font-semibold text-right shrink-0">
+                        {formatCurrency(item.line_total)}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="font-normal">
+                      {item.category}
+                    </Badge>
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>Qty: {item.quantity}</span>
+                      <span>Unit: {formatCurrency(item.unit_cost)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: table */}
+              <div className="hidden sm:block rounded-md border">
+                <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/50">
                       <th className="px-4 py-3 text-left font-medium">Item</th>
@@ -203,12 +228,20 @@ export default async function ExpenseDetailPage({
                   </tfoot>
                 </table>
               </div>
+
+              {/* Mobile: grand total */}
+              <div className="sm:hidden mt-3 flex items-center justify-between rounded-lg bg-primary/10 p-4">
+                <span className="font-semibold">Grand Total</span>
+                <span className="text-xl font-bold text-primary">
+                  {formatCurrency(expense.grand_total)}
+                </span>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Receipt Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
