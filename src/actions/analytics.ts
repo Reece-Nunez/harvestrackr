@@ -62,11 +62,12 @@ export async function getAnalyticsSummary(farmId: string, dateRange: DateRange):
   const { startDate, endDate } = dateRange;
 
   // Calculate previous period for comparison
+  // Add 1 day to period length so "Apr 1 - Apr 30" (30 days) produces "Mar 2 - Mar 31" correctly
   const startDateObj = new Date(startDate);
   const endDateObj = new Date(endDate);
-  const periodLength = endDateObj.getTime() - startDateObj.getTime();
-  const prevStartDate = new Date(startDateObj.getTime() - periodLength);
-  const prevEndDate = new Date(endDateObj.getTime() - periodLength);
+  const periodLengthMs = endDateObj.getTime() - startDateObj.getTime() + 86400000; // +1 day in ms
+  const prevStartDate = new Date(startDateObj.getTime() - periodLengthMs);
+  const prevEndDate = new Date(startDateObj.getTime() - 86400000); // day before current start
 
   // Current period income
   const { data: currentIncome } = await supabase

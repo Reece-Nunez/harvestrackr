@@ -88,7 +88,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
         customEndDate ? format(customEndDate, "yyyy-MM-dd") : undefined
       );
 
-      const currentYear = new Date().getFullYear();
+      const trendYear = new Date(dateRange.startDate).getFullYear();
 
       const [
         summaryData,
@@ -102,7 +102,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
         getAnalyticsSummary(farmId, dateRange),
         getExpensesByCategory(farmId, dateRange),
         getIncomeByItem(farmId, dateRange),
-        getMonthlyTrends(farmId, currentYear),
+        getMonthlyTrends(farmId, trendYear),
         getCashFlowData(farmId, dateRange),
         getTopExpenses(farmId, dateRange, 5),
         getRecentTransactions(farmId, 10),
