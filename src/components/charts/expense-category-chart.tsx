@@ -28,7 +28,7 @@ export function ExpenseCategoryChart({ data, loading = false }: ExpenseCategoryC
     >
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="h-[250px] w-full md:w-1/2">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <PieChart>
               <Pie
                 data={chartData}

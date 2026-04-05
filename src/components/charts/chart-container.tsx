@@ -52,15 +52,17 @@ export function ChartContainer({
   );
 }
 
+const SKELETON_HEIGHTS = [75, 45, 60, 85, 50, 70, 40, 65];
+
 function ChartSkeleton() {
   return (
     <div className="h-[300px] w-full animate-pulse">
       <div className="flex h-full items-end justify-around gap-2 pt-8">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {SKELETON_HEIGHTS.map((height, i) => (
           <Skeleton
             key={i}
             className="w-full"
-            style={{ height: `${Math.random() * 60 + 30}%` }}
+            style={{ height: `${height}%` }}
           />
         ))}
       </div>
