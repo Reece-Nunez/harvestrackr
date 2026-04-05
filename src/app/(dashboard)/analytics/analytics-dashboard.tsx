@@ -61,7 +61,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
 
   // Date range state
   const [datePreset, setDatePreset] = useState<DateRangePreset>(
-    (searchParams.get("preset") as DateRangePreset) || "this_month"
+    (searchParams.get("preset") as DateRangePreset) || "this_year"
   );
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -88,8 +88,6 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
         customEndDate ? format(customEndDate, "yyyy-MM-dd") : undefined
       );
 
-      const trendYear = new Date(dateRange.startDate).getFullYear();
-
       const [
         summaryData,
         categoryData,
@@ -102,7 +100,7 @@ export function AnalyticsDashboard({ farmId }: AnalyticsDashboardProps) {
         getAnalyticsSummary(farmId, dateRange),
         getExpensesByCategory(farmId, dateRange),
         getIncomeByItem(farmId, dateRange),
-        getMonthlyTrends(farmId, trendYear),
+        getMonthlyTrends(farmId, dateRange),
         getCashFlowData(farmId, dateRange),
         getTopExpenses(farmId, dateRange, 5),
         getRecentTransactions(farmId, 10),

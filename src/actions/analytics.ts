@@ -229,12 +229,11 @@ export async function getIncomeByItem(farmId: string, dateRange: DateRange): Pro
   return items.sort((a, b) => b.amount - a.amount);
 }
 
-export async function getMonthlyTrends(farmId: string, year: number): Promise<MonthlyTrend[]> {
+export async function getMonthlyTrends(farmId: string, dateRange: DateRange): Promise<MonthlyTrend[]> {
   const supabase = await createClient();
-  const startDate = `${year}-01-01`;
-  const endDate = `${year}-12-31`;
+  const { startDate, endDate } = dateRange;
 
-  // Get all income for the year
+  // Get all income for the range
   const { data: incomeData } = await supabase
     .from("income")
     .select("date, amount")
@@ -242,7 +241,7 @@ export async function getMonthlyTrends(farmId: string, year: number): Promise<Mo
     .gte("date", startDate)
     .lte("date", endDate);
 
-  // Get all expenses for the year
+  // Get all expenses for the range
   const { data: expenseData } = await supabase
     .from("expenses")
     .select("date, grand_total")
@@ -250,11 +249,17 @@ export async function getMonthlyTrends(farmId: string, year: number): Promise<Mo
     .gte("date", startDate)
     .lte("date", endDate);
 
-  // Create monthly buckets
+  // Determine month range from the date range
+  const start = new Date(startDate);
+  const end = new Date(endDate);
   const months: MonthlyTrend[] = [];
-  for (let month = 0; month < 12; month++) {
-    const monthKey = format(new Date(year, month, 1), "MMM");
-    const monthPrefix = format(new Date(year, month, 1), "yyyy-MM");
+
+  const current = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+
+  while (current <= last) {
+    const monthKey = format(current, "MMM yyyy");
+    const monthPrefix = format(current, "yyyy-MM");
 
     const monthRevenue = incomeData
       ?.filter((i) => i.date.startsWith(monthPrefix))
@@ -270,6 +275,8 @@ export async function getMonthlyTrends(farmId: string, year: number): Promise<Mo
       expenses: monthExpenses,
       profit: monthRevenue - monthExpenses,
     });
+
+    current.setMonth(current.getMonth() + 1);
   }
 
   return months;
